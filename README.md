@@ -1,5 +1,7 @@
 # Sistema de ventas con facturación electrónica SUNAT — Frontend
 
+[![Verificación](https://github.com/yorchavez9/SISTEMA-CURSO-FRONTEND/actions/workflows/ci.yml/badge.svg)](https://github.com/yorchavez9/SISTEMA-CURSO-FRONTEND/actions/workflows/ci.yml)
+
 Interfaz en React 19 + TypeScript + Vite con shadcn/ui, TanStack Query y react-hook-form + zod.
 La API (Laravel) y la documentación completa están en [SISTEMAS-CURSO-BACKEND](https://github.com/yorchavez9/SISTEMAS-CURSO-BACKEND) (carpeta `docs/`).
 
