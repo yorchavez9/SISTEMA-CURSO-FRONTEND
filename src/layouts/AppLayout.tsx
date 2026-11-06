@@ -16,6 +16,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { ModeToggle } from "@/components/shared/ModeToggle"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,6 +91,9 @@ export function AppLayout() {
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
           <EntornoBadge />
+          <div className="ml-auto">
+            <ModeToggle />
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-6">
           <Outlet />
