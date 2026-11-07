@@ -5,8 +5,14 @@ import axios, { AxiosError } from "axios"
  * axios reenvía automáticamente el token CSRF desde la cookie XSRF-TOKEN.
  * El frontend NUNCA recibe ni maneja credenciales de la API de facturación.
  */
+/**
+ * Origen del backend. En desarrollo queda vacío (proxy de Vite). En producción, si el backend está en otro
+ * dominio, se define VITE_API_URL al compilar (p. ej. https://api.midominio.com, sin "/" final).
+ */
+export const API_ORIGIN = (import.meta.env.VITE_API_URL ?? "").replace(/\/+$/, "")
+
 export const api = axios.create({
-  baseURL: "/api/v1",
+  baseURL: `${API_ORIGIN}/api/v1`,
   withCredentials: true,
   withXSRFToken: true,
   headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
@@ -23,7 +29,7 @@ api.interceptors.request.use((config) => {
 })
 
 export async function csrf() {
-  await axios.get("/sanctum/csrf-cookie", { withCredentials: true })
+  await axios.get(`${API_ORIGIN}/sanctum/csrf-cookie`, { withCredentials: true, withXSRFToken: true })
 }
 
 export type ApiValidationErrors = Record<string, string[]>
