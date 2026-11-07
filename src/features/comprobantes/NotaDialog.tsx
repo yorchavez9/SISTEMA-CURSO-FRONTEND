@@ -133,7 +133,7 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
               <Table>
                 <TableBody>
                   {d.lineas.map((l) => (
-                    <TableRow key={l.venta_detalle_id}><TableCell>{l.descripcion}</TableCell><TableCell className="text-right font-mono">{l.cantidad} {l.unidad}</TableCell></TableRow>
+                    <TableRow key={l.venta_detalle_id}><TableCell>{l.descripcion}</TableCell><TableCell className="text-right tabular-nums">{l.cantidad} {l.unidad}</TableCell></TableRow>
                   ))}
                 </TableBody>
               </Table>
@@ -146,10 +146,10 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
                 <TableBody>
                   {lineasValidas.map((l) => (
                     <TableRow key={l.venta_detalle_id}>
-                      <TableCell>{l.descripcion}<div className="font-mono text-xs text-muted-foreground">{soles(l.precio_efectivo)} c/u{l.devuelto > 0 && ` · ya devuelto ${l.devuelto}`}</div></TableCell>
-                      <TableCell className="text-right font-mono">{l.disponible}</TableCell>
+                      <TableCell>{l.descripcion}<div className="tabular-nums text-xs text-muted-foreground">{soles(l.precio_efectivo)} c/u{l.devuelto > 0 && ` · ya devuelto ${l.devuelto}`}</div></TableCell>
+                      <TableCell className="text-right tabular-nums">{l.disponible}</TableCell>
                       <TableCell>
-                        <Input inputMode="decimal" className="font-mono" aria-label={`Cantidad a devolver de ${l.descripcion}`} disabled={l.disponible <= 0}
+                        <Input inputMode="decimal" className="tabular-nums" aria-label={`Cantidad a devolver de ${l.descripcion}`} disabled={l.disponible <= 0}
                           value={cantidades[l.venta_detalle_id] ?? ""} onChange={(e) => setCantidades((c) => ({ ...c, [l.venta_detalle_id]: e.target.value }))} />
                       </TableCell>
                     </TableRow>
@@ -163,7 +163,7 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
                   <div key={i} className="grid grid-cols-[1fr_8rem_auto] gap-2">
                     <Input placeholder={esNC ? "Concepto (p. ej. Descuento por volumen)" : "Concepto (p. ej. Interés por mora)"} aria-label="Concepto" value={x.descripcion}
                       onChange={(e) => setMontos((ms) => ms.map((y, j) => (j === i ? { ...y, descripcion: e.target.value } : y)))} />
-                    <Input inputMode="decimal" className="font-mono" placeholder="Importe" aria-label="Importe con impuestos" value={x.importe}
+                    <Input inputMode="decimal" className="tabular-nums" placeholder="Importe" aria-label="Importe con impuestos" value={x.importe}
                       onChange={(e) => setMontos((ms) => ms.map((y, j) => (j === i ? { ...y, importe: e.target.value } : y)))} />
                     <Button variant="ghost" size="icon" aria-label="Quitar concepto" disabled={montos.length === 1} onClick={() => setMontos((ms) => ms.filter((_, j) => j !== i))}><Trash2Icon /></Button>
                   </div>
@@ -198,7 +198,7 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
 
             <div className="flex items-baseline justify-between rounded-lg bg-muted/50 p-3">
               <span className="text-sm text-muted-foreground">Importe estimado {m && <Badge variant="outline" className="ml-1">{m.modo === "total" ? "total" : m.modo === "item" ? "por ítem" : "por monto"}</Badge>}</span>
-              <span className="font-mono text-xl font-semibold">{soles(estimado, d.comprobante.moneda)}</span>
+              <span className="tabular-nums text-xl font-semibold">{soles(estimado, d.comprobante.moneda)}</span>
             </div>
             {bloqueo && <Alert variant="destructive"><CircleAlertIcon /><AlertDescription>{bloqueo}</AlertDescription></Alert>}
           </FieldGroup>

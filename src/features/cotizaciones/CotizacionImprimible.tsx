@@ -37,7 +37,7 @@ export function CotizacionImprimible() {
           </div>
           <div className="rounded border border-neutral-400 px-4 py-2 text-center">
             <p className="font-semibold tracking-wide">COTIZACIÓN</p>
-            <p className="font-mono text-base">{c.codigo}</p>
+            <p className="tabular-nums text-base">{c.codigo}</p>
           </div>
         </header>
 
@@ -67,10 +67,10 @@ export function CotizacionImprimible() {
               <tr key={n} className="border-b border-neutral-200 align-top">
                 <td className="py-2 pr-2 text-neutral-500">{n + 1}</td>
                 <td className="py-2 pr-2">{i.descripcion}{i.codigo && <span className="block text-xs text-neutral-500">{i.codigo}</span>}</td>
-                <td className="py-2 pr-2 text-right font-mono">{i.cantidad} {i.unidad}</td>
-                <td className="py-2 pr-2 text-right font-mono">{soles(i.precio_unitario, c.moneda)}</td>
-                <td className="py-2 pr-2 text-right font-mono">{i.descuento > 0 ? soles(i.descuento, c.moneda) : "—"}</td>
-                <td className="py-2 text-right font-mono">{soles(i.total, c.moneda)}</td>
+                <td className="py-2 pr-2 text-right tabular-nums">{i.cantidad} {i.unidad}</td>
+                <td className="py-2 pr-2 text-right tabular-nums">{soles(i.precio_unitario, c.moneda)}</td>
+                <td className="py-2 pr-2 text-right tabular-nums">{i.descuento > 0 ? soles(i.descuento, c.moneda) : "—"}</td>
+                <td className="py-2 text-right tabular-nums">{soles(i.total, c.moneda)}</td>
               </tr>
             ))}
           </tbody>
@@ -82,7 +82,7 @@ export function CotizacionImprimible() {
           {c.totales.inafectas > 0 && <Fila k="Op. inafectas" v={soles(c.totales.inafectas, c.moneda)} />}
           {c.totales.exportacion > 0 && <Fila k="Exportación" v={soles(c.totales.exportacion, c.moneda)} />}
           <Fila k={`IGV (${c.tasa_igv} %)`} v={soles(c.totales.igv, c.moneda)} />
-          <div className="mt-1 flex justify-between border-t border-neutral-400 pt-1 text-base font-semibold"><span>Total</span><span className="font-mono">{soles(c.totales.total, c.moneda)}</span></div>
+          <div className="mt-1 flex justify-between border-t border-neutral-400 pt-1 text-base font-semibold"><span>Total</span><span className="tabular-nums">{soles(c.totales.total, c.moneda)}</span></div>
         </div>
 
         {c.observacion && (
@@ -98,5 +98,5 @@ export function CotizacionImprimible() {
 }
 
 function Fila({ k, v }: { k: string; v: string }) {
-  return <div className="flex justify-between"><span className="text-neutral-600">{k}</span><span className="font-mono">{v}</span></div>
+  return <div className="flex justify-between"><span className="text-neutral-600">{k}</span><span className="tabular-nums">{v}</span></div>
 }

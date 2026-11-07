@@ -164,15 +164,15 @@ export function ComprobantesPage() {
                 {lista.data?.data.map((c) => (
                   <TableRow key={c.id} className="cursor-pointer" onClick={() => setParams({ ver: String(c.id) })}>
                     <TableCell>
-                      <div className="font-mono font-medium">{c.numero}</div>
+                      <div className="tabular-nums font-medium">{c.numero}</div>
                       <div className="text-xs text-muted-foreground">{TIPO[c.tipo_documento]}</div>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">{c.fecha_emision}</TableCell>
                     <TableCell className="max-w-64">
                       <div className="truncate">{c.cliente.razon_social}</div>
-                      <div className="font-mono text-xs text-muted-foreground">{c.cliente.num_doc}</div>
+                      <div className="tabular-nums text-xs text-muted-foreground">{c.cliente.num_doc}</div>
                     </TableCell>
-                    <TableCell className="text-right font-mono">{soles(c.total, c.moneda)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(c.total, c.moneda)}</TableCell>
                     <TableCell>
                       <EstadoBadge estado={c.estado} />
                       {c.diferencia_totales && <Badge variant="destructive" className="ml-1" title="El total de la API difiere del calculado">Δ total</Badge>}
@@ -218,7 +218,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle className="font-mono">{c?.numero ?? "Comprobante"}</SheetTitle>
+          <SheetTitle className="tabular-nums">{c?.numero ?? "Comprobante"}</SheetTitle>
           <SheetDescription>{c ? `${TIPO[c.tipo_documento]} · ${c.fecha_emision}` : "Cargando…"}</SheetDescription>
         </SheetHeader>
         {d.isLoading && <div className="p-4"><Skeleton className="h-64" /></div>}
@@ -270,7 +270,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
             {c.referencia && (
               <section>
                 <h3 className="mb-1 font-medium">{c.tipo_documento === "07" ? "Nota de crédito" : "Nota de débito"} sobre</h3>
-                <Button variant="link" className="h-auto p-0 font-mono" onClick={() => onVer(c.referencia!.id)}>{c.referencia.numero}</Button>
+                <Button variant="link" className="h-auto p-0 tabular-nums" onClick={() => onVer(c.referencia!.id)}>{c.referencia.numero}</Button>
                 {c.motivo && <p className="text-muted-foreground">Motivo {c.motivo.codigo}: {c.motivo.descripcion}</p>}
               </section>
             )}
@@ -279,8 +279,8 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
                 <h3 className="mb-1 font-medium">Notas emitidas</h3>
                 {c.notas.map((n) => (
                   <div key={n.id} className="flex items-center justify-between gap-2">
-                    <Button variant="link" className="h-auto p-0 font-mono" onClick={() => onVer(n.id)}>{n.numero}</Button>
-                    <span className="flex items-center gap-2"><span className="font-mono">{n.tipo_documento === "07" ? "−" : "+"}{soles(n.total, c.moneda)}</span><EstadoBadge estado={n.estado} /></span>
+                    <Button variant="link" className="h-auto p-0 tabular-nums" onClick={() => onVer(n.id)}>{n.numero}</Button>
+                    <span className="flex items-center gap-2"><span className="tabular-nums">{n.tipo_documento === "07" ? "−" : "+"}{soles(n.total, c.moneda)}</span><EstadoBadge estado={n.estado} /></span>
                   </div>
                 ))}
               </section>
@@ -290,7 +290,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
                 <h3 className="mb-1 font-medium">Bajas</h3>
                 {c.bajas.map((b) => (
                   <div key={b.id} className="flex flex-col gap-1 rounded-md border p-2">
-                    <div className="flex items-center justify-between gap-2"><span className="font-mono">{b.identifier ?? b.tipo}</span><EstadoBaja estado={b.estado} /></div>
+                    <div className="flex items-center justify-between gap-2"><span className="tabular-nums">{b.identifier ?? b.tipo}</span><EstadoBaja estado={b.estado} /></div>
                     <span className="text-xs text-muted-foreground">{b.motivo}{(b.ultimo_error || b.sunat_descripcion) && ` · ${b.ultimo_error ?? `${b.sunat_codigo} ${b.sunat_descripcion}`}`}</span>
                   </div>
                 ))}
@@ -303,7 +303,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
             <section>
               <h3 className="mb-1 font-medium">Cliente</h3>
               <p>{c.cliente.razon_social}</p>
-              <p className="font-mono text-xs text-muted-foreground">{c.cliente.tipo_doc === "6" ? "RUC" : "Doc."} {c.cliente.num_doc}{c.cliente_direccion ? ` · ${c.cliente_direccion}` : ""}</p>
+              <p className="tabular-nums text-xs text-muted-foreground">{c.cliente.tipo_doc === "6" ? "RUC" : "Doc."} {c.cliente.num_doc}{c.cliente_direccion ? ` · ${c.cliente_direccion}` : ""}</p>
             </section>
 
             <section>
@@ -314,9 +314,9 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
                     <TableRow key={i}>
                       <TableCell>
                         {it.descripcion}
-                        <div className="font-mono text-xs text-muted-foreground">{Number(it.cantidad)} {it.unidad} × {Number(it.precio_unitario).toFixed(2)} · afect. {it.tip_afe_igv}</div>
+                        <div className="tabular-nums text-xs text-muted-foreground">{Number(it.cantidad)} {it.unidad} × {Number(it.precio_unitario).toFixed(2)} · afect. {it.tip_afe_igv}</div>
                       </TableCell>
-                      <TableCell className="text-right font-mono">{soles(Number(it.total), c.moneda)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{soles(Number(it.total), c.moneda)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -327,7 +327,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
               {Object.entries(c.totales).filter(([k, v]) => v !== 0 && !["valor_venta", "sub_total", "total_impuestos"].includes(k)).map(([k, v]) => (
                 <div key={k} className="flex justify-between">
                   <span className="text-muted-foreground capitalize">{k.replace("_", " ")}</span>
-                  <span className="font-mono">{soles(v, c.moneda)}</span>
+                  <span className="tabular-nums">{soles(v, c.moneda)}</span>
                 </div>
               ))}
             </section>
@@ -335,7 +335,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
             {c.cuotas.length > 0 && (
               <section>
                 <h3 className="mb-1 font-medium">Cuotas</h3>
-                {c.cuotas.map((q) => <div key={q.numero} className="flex justify-between font-mono"><span>{q.numero}. {q.fecha_vencimiento}</span><span>{soles(q.monto, c.moneda)}</span></div>)}
+                {c.cuotas.map((q) => <div key={q.numero} className="flex justify-between tabular-nums"><span>{q.numero}. {q.fecha_vencimiento}</span><span>{soles(q.monto, c.moneda)}</span></div>)}
               </section>
             )}
 
@@ -362,16 +362,16 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
                   {c.solicitudes.map((s, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <span className="font-mono text-xs">{s.metodo} {s.endpoint}</span>
+                        <span className="tabular-nums text-xs">{s.metodo} {s.endpoint}</span>
                         {s.error && <div className="text-xs text-destructive">{s.error}</div>}
                       </TableCell>
                       <TableCell><Badge variant={s.http_status && s.http_status < 300 ? "outline" : "destructive"}>{s.http_status ?? "—"}</Badge></TableCell>
-                      <TableCell className="text-right font-mono text-xs">{s.duracion_ms ?? "—"}</TableCell>
+                      <TableCell className="text-right tabular-nums text-xs">{s.duracion_ms ?? "—"}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
-              {c.hash_cpe && <p className="mt-2 break-all font-mono text-xs text-muted-foreground">Hash CPE: {c.hash_cpe}</p>}
+              {c.hash_cpe && <p className="mt-2 break-all tabular-nums text-xs text-muted-foreground">Hash CPE: {c.hash_cpe}</p>}
             </section>
           </div>
         )}

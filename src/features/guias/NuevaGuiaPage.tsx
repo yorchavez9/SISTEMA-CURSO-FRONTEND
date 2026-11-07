@@ -235,7 +235,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="dnum">Número</FieldLabel>
-                    <Input id="dnum" className="font-mono" value={dest.num_doc} onChange={(e) => setDest({ ...dest, num_doc: e.target.value.trim() })} required />
+                    <Input id="dnum" className="tabular-nums" value={dest.num_doc} onChange={(e) => setDest({ ...dest, num_doc: e.target.value.trim() })} required />
                     <FieldError>{err("destinatario.num_doc")}</FieldError>
                   </Field>
                 </div>
@@ -266,7 +266,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
             <FieldGroup className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Field>
                 <FieldLabel htmlFor="truc">RUC del transportista</FieldLabel>
-                <Input id="truc" className="font-mono" inputMode="numeric" maxLength={11} value={transportista.num_doc} onChange={(e) => setTransportista({ ...transportista, num_doc: e.target.value.trim() })} required />
+                <Input id="truc" className="tabular-nums" inputMode="numeric" maxLength={11} value={transportista.num_doc} onChange={(e) => setTransportista({ ...transportista, num_doc: e.target.value.trim() })} required />
                 <FieldError>{err("transportista.num_doc")}</FieldError>
               </Field>
               <Field className="lg:col-span-2">
@@ -292,12 +292,12 @@ function FormularioGuia({ o }: { o: Opciones }) {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field>
                       <FieldLabel htmlFor="placa">Placa</FieldLabel>
-                      <Input id="placa" className="font-mono uppercase" placeholder="ABC123" value={placa} onChange={(e) => setPlaca(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))} />
+                      <Input id="placa" className="tabular-nums uppercase" placeholder="ABC123" value={placa} onChange={(e) => setPlaca(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))} />
                       <FieldError>{err("vehiculo.placa")}</FieldError>
                     </Field>
                     <Field>
                       <FieldLabel htmlFor="placa2">Placa secundaria <span className="font-normal text-muted-foreground">(remolque, opcional)</span></FieldLabel>
-                      <Input id="placa2" className="font-mono uppercase" value={placa2} onChange={(e) => setPlaca2(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))} />
+                      <Input id="placa2" className="tabular-nums uppercase" value={placa2} onChange={(e) => setPlaca2(e.target.value.replace(/[^a-zA-Z0-9]/g, ""))} />
                     </Field>
                   </div>
                   {conductores.map((c, i) => (
@@ -311,7 +311,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                       </Field>
                       <Field>
                         <FieldLabel htmlFor={`cn${i}`}>Número</FieldLabel>
-                        <Input id={`cn${i}`} className="font-mono" value={c.num_doc} onChange={(e) => setConductores(conductores.map((x, j) => (j === i ? { ...x, num_doc: e.target.value.trim() } : x)))} />
+                        <Input id={`cn${i}`} className="tabular-nums" value={c.num_doc} onChange={(e) => setConductores(conductores.map((x, j) => (j === i ? { ...x, num_doc: e.target.value.trim() } : x)))} />
                         <FieldError>{err(`conductores.${i}.num_doc`)}</FieldError>
                       </Field>
                       <Field>
@@ -324,7 +324,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                       </Field>
                       <Field>
                         <FieldLabel htmlFor={`cl${i}`}>Licencia</FieldLabel>
-                        <Input id={`cl${i}`} className="font-mono uppercase" placeholder="Q12345678" value={c.licencia} onChange={(e) => setConductores(conductores.map((x, j) => (j === i ? { ...x, licencia: e.target.value.trim() } : x)))} />
+                        <Input id={`cl${i}`} className="tabular-nums uppercase" placeholder="Q12345678" value={c.licencia} onChange={(e) => setConductores(conductores.map((x, j) => (j === i ? { ...x, licencia: e.target.value.trim() } : x)))} />
                         <FieldError>{err(`conductores.${i}.licencia`)}</FieldError>
                       </Field>
                       <Button type="button" variant="ghost" size="icon" aria-label="Quitar conductor" disabled={conductores.length === 1} onClick={() => setConductores(conductores.filter((_, j) => j !== i))}><Trash2Icon /></Button>
@@ -354,7 +354,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
             <TableBody>
               {items.map((it, i) => (
                 <TableRow key={i}>
-                  <TableCell><Input aria-label="Código" className="font-mono" value={it.codigo ?? ""} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, codigo: e.target.value || null } : x)))} /></TableCell>
+                  <TableCell><Input aria-label="Código" className="tabular-nums" value={it.codigo ?? ""} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, codigo: e.target.value || null } : x)))} /></TableCell>
                   <TableCell><Input aria-label="Descripción" value={it.descripcion} required onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, descripcion: e.target.value } : x)))} /></TableCell>
                   <TableCell>
                     <Select value={it.unidad} onValueChange={(v) => setItems(items.map((x, j) => (j === i ? { ...x, unidad: v } : x)))}>
@@ -365,7 +365,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                       </SelectContent>
                     </Select>
                   </TableCell>
-                  <TableCell><Input aria-label="Cantidad" type="number" min="0.0001" step="any" className="text-right font-mono" value={it.cantidad} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, cantidad: Number(e.target.value) } : x)))} /></TableCell>
+                  <TableCell><Input aria-label="Cantidad" type="number" min="0.0001" step="any" className="text-right tabular-nums" value={it.cantidad} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, cantidad: Number(e.target.value) } : x)))} /></TableCell>
                   <TableCell><Button type="button" variant="ghost" size="icon" aria-label="Quitar bien" disabled={items.length === 1} onClick={() => setItems(items.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
                 </TableRow>
               ))}
@@ -390,7 +390,7 @@ function UbigeoDireccion({ id, titulo, valor, onChange, errUbigeo, errDireccion 
     <div className="grid gap-4 sm:grid-cols-[8rem_1fr]">
       <Field>
         <FieldLabel htmlFor={`${id}-ub`}>Ubigeo</FieldLabel>
-        <Input id={`${id}-ub`} className="font-mono" inputMode="numeric" maxLength={6} placeholder="150101" value={valor.ubigeo}
+        <Input id={`${id}-ub`} className="tabular-nums" inputMode="numeric" maxLength={6} placeholder="150101" value={valor.ubigeo}
           onChange={(e) => onChange({ ...valor, ubigeo: e.target.value.replace(/\D/g, "") })} required />
         <FieldError>{errUbigeo}</FieldError>
       </Field>

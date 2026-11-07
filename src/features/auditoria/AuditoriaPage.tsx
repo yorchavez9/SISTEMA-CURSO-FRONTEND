@@ -36,7 +36,7 @@ function Cambios({ antes, despues }: { antes: Registro["antes"]; despues: Regist
         <li key={k} className="break-words">
           <span className="text-muted-foreground">{k}: </span>
           {antes && k in antes && <><span className="line-through decoration-muted-foreground">{valor(antes[k])}</span>{" → "}</>}
-          <span className="font-mono">{despues && k in despues ? valor(despues[k]) : "—"}</span>
+          <span className="tabular-nums">{despues && k in despues ? valor(despues[k]) : "—"}</span>
         </li>
       ))}
       {claves.length > 8 && <li className="text-muted-foreground">y {claves.length - 8} campos más</li>}
@@ -120,11 +120,11 @@ export function AuditoriaPage() {
                   <TableRow key={r.id} className="align-top">
                     <TableCell className="whitespace-nowrap">
                       {new Date(r.fecha).toLocaleString("es-PE", { dateStyle: "short", timeStyle: "medium" })}
-                      {r.ip && <div className="font-mono text-xs text-muted-foreground">{r.ip}</div>}
+                      {r.ip && <div className="tabular-nums text-xs text-muted-foreground">{r.ip}</div>}
                     </TableCell>
                     <TableCell>
                       <div>{r.descripcion}</div>
-                      {r.objeto && <div className="font-mono text-xs text-muted-foreground">{r.objeto}</div>}
+                      {r.objeto && <div className="tabular-nums text-xs text-muted-foreground">{r.objeto}</div>}
                     </TableCell>
                     <TableCell>{r.usuario ?? <span className="text-muted-foreground">Proceso automático</span>}</TableCell>
                     <TableCell className="max-w-md whitespace-normal"><Cambios antes={r.antes} despues={r.despues} /></TableCell>

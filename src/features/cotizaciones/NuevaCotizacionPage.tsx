@@ -148,15 +148,15 @@ export function NuevaCotizacionPage() {
                     {lineas.map((l) => (
                       <TableRow key={l.key}>
                         <TableCell><Input aria-label="Descripción" value={l.descripcion} onChange={(e) => cambiar(l.key, { descripcion: e.target.value })} required /></TableCell>
-                        <TableCell><Input aria-label="Cantidad" type="number" min="0.0001" step="any" className="text-right font-mono" value={l.cantidad} onChange={(e) => cambiar(l.key, { cantidad: e.target.value })} /></TableCell>
-                        <TableCell><Input aria-label="Precio unitario" type="number" min="0" step="any" className="text-right font-mono" value={l.precio} onChange={(e) => cambiar(l.key, { precio: e.target.value })} /></TableCell>
+                        <TableCell><Input aria-label="Cantidad" type="number" min="0.0001" step="any" className="text-right tabular-nums" value={l.cantidad} onChange={(e) => cambiar(l.key, { cantidad: e.target.value })} /></TableCell>
+                        <TableCell><Input aria-label="Precio unitario" type="number" min="0" step="any" className="text-right tabular-nums" value={l.precio} onChange={(e) => cambiar(l.key, { precio: e.target.value })} /></TableCell>
                         <TableCell>
                           <Select value={l.tip_afe_igv} onValueChange={(v) => cambiar(l.key, { tip_afe_igv: v })} disabled={!!l.producto_id}>
                             <SelectTrigger aria-label="Afectación IGV"><SelectValue /></SelectTrigger>
                             <SelectContent>{afectaciones.map((a) => <SelectItem key={a.codigo} value={a.codigo}>{a.codigo} · {a.descripcion}</SelectItem>)}</SelectContent>
                           </Select>
                         </TableCell>
-                        <TableCell><Input aria-label="Descuento" type="number" min="0" step="0.01" className="text-right font-mono" value={l.descuento} onChange={(e) => cambiar(l.key, { descuento: e.target.value })} /></TableCell>
+                        <TableCell><Input aria-label="Descuento" type="number" min="0" step="0.01" className="text-right tabular-nums" value={l.descuento} onChange={(e) => cambiar(l.key, { descuento: e.target.value })} /></TableCell>
                         <TableCell><Button type="button" variant="ghost" size="icon" aria-label="Quitar ítem" onClick={() => setLineas((ls) => ls.filter((x) => x.key !== l.key))}><Trash2Icon /></Button></TableCell>
                       </TableRow>
                     ))}
@@ -184,11 +184,11 @@ export function NuevaCotizacionPage() {
             {preview.isFetching && !t ? <Skeleton className="h-24" /> : !t ? <p className="text-muted-foreground">Agrega ítems para ver los totales.</p> : (
               <>
                 {[["gravadas", "Op. gravadas"], ["exoneradas", "Op. exoneradas"], ["inafectas", "Op. inafectas"], ["exportacion", "Exportación"]].filter(([k]) => Number(t[k]) > 0).map(([k, label]) => (
-                  <div key={k} className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-mono">{soles(Number(t[k]))}</span></div>
+                  <div key={k} className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="tabular-nums">{soles(Number(t[k]))}</span></div>
                 ))}
-                <div className="flex justify-between"><span className="text-muted-foreground">IGV ({preview.data?.tasa_igv} %)</span><span className="font-mono">{soles(Number(t.igv))}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">IGV ({preview.data?.tasa_igv} %)</span><span className="tabular-nums">{soles(Number(t.igv))}</span></div>
                 <Separator />
-                <div className="flex justify-between text-base font-medium"><span>Total</span><span className="font-mono">{soles(Number(t.total))}</span></div>
+                <div className="flex justify-between text-base font-medium"><span>Total</span><span className="tabular-nums">{soles(Number(t.total))}</span></div>
               </>
             )}
             {preview.isError && <p className="text-destructive">{toApiError(preview.error).message}</p>}

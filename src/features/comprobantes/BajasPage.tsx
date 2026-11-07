@@ -97,8 +97,8 @@ export function BajasPage() {
               <TableBody>
                 {q.data?.data.map((b) => (
                   <TableRow key={b.id}>
-                    <TableCell><div className="font-mono">{b.identifier ?? "—"}</div><div className="text-xs text-muted-foreground">{b.tipo_label} · {b.usuario}</div></TableCell>
-                    <TableCell className="font-mono text-sm">{b.comprobantes.map((c) => c.numero).join(", ")}</TableCell>
+                    <TableCell><div className="tabular-nums">{b.identifier ?? "—"}</div><div className="text-xs text-muted-foreground">{b.tipo_label} · {b.usuario}</div></TableCell>
+                    <TableCell className="tabular-nums text-sm">{b.comprobantes.map((c) => c.numero).join(", ")}</TableCell>
                     <TableCell className="max-w-56 truncate text-sm">{b.motivo}</TableCell>
                     <TableCell>
                       <EstadoBaja estado={b.estado} />

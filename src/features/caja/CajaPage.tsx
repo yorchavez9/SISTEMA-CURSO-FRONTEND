@@ -87,7 +87,7 @@ function AbrirCaja({ cajas, onAbierta }: { cajas: { id: number; nombre: string; 
             </Field>
             <Field>
               <FieldLabel htmlFor="apertura">Fondo inicial en efectivo</FieldLabel>
-              <Input id="apertura" inputMode="decimal" className="font-mono" value={monto} onChange={(e) => setMonto(e.target.value)} />
+              <Input id="apertura" inputMode="decimal" className="tabular-nums" value={monto} onChange={(e) => setMonto(e.target.value)} />
             </Field>
           </FieldGroup>
         )}
@@ -127,9 +127,9 @@ function SesionAbierta({ sesion, metodos, onCambio }: { sesion: Sesion; metodos:
                 {r.por_metodo.map((m) => (
                   <TableRow key={m.metodo}>
                     <TableCell>{m.label}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(Number(m.ingresos))}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(Number(m.egresos))}</TableCell>
-                    <TableCell className="text-right font-mono font-medium">{soles(Number(m.neto))}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(Number(m.ingresos))}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(Number(m.egresos))}</TableCell>
+                    <TableCell className="text-right tabular-nums font-medium">{soles(Number(m.neto))}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -139,7 +139,7 @@ function SesionAbierta({ sesion, metodos, onCambio }: { sesion: Sesion; metodos:
         <Card>
           <CardHeader>
             <CardDescription>Efectivo que debe haber en caja</CardDescription>
-            <CardTitle className="font-mono text-3xl">{soles(Number(r.efectivo_esperado))}</CardTitle>
+            <CardTitle className="tabular-nums text-3xl">{soles(Number(r.efectivo_esperado))}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">{r.pagos_registrados} cobro{r.pagos_registrados === 1 ? "" : "s"} registrados en esta sesión.</CardContent>
         </Card>
@@ -158,7 +158,7 @@ function SesionAbierta({ sesion, metodos, onCambio }: { sesion: Sesion; metodos:
                   <TableCell><Badge variant={m.tipo === "ingreso" ? "outline" : "secondary"}>{CONCEPTOS[m.concepto] ?? m.concepto}</Badge></TableCell>
                   <TableCell>{metodos.find((x) => x.metodo === m.metodo)?.label ?? m.metodo}</TableCell>
                   <TableCell className="max-w-64 truncate text-sm text-muted-foreground">{m.descripcion ?? "—"}</TableCell>
-                  <TableCell className={cn("text-right font-mono", m.tipo === "egreso" && "text-destructive")}>{m.tipo === "egreso" ? "−" : ""}{soles(m.monto)}</TableCell>
+                  <TableCell className={cn("text-right tabular-nums", m.tipo === "egreso" && "text-destructive")}>{m.tipo === "egreso" ? "−" : ""}{soles(m.monto)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -211,7 +211,7 @@ function MovimientoDialog({ tipo, metodos, onClose, onDone }: { tipo: "ingreso" 
           </div>
           <Field>
             <FieldLabel htmlFor="mov-monto">Monto</FieldLabel>
-            <Input id="mov-monto" inputMode="decimal" className="font-mono" value={monto} onChange={(e) => setMonto(e.target.value)} />
+            <Input id="mov-monto" inputMode="decimal" className="tabular-nums" value={monto} onChange={(e) => setMonto(e.target.value)} />
           </Field>
           <Field>
             <FieldLabel htmlFor="mov-desc">Descripción</FieldLabel>
@@ -245,10 +245,10 @@ function CerrarDialog({ sesion, onClose, onDone }: { sesion: Sesion; onClose: ()
           <DialogDescription>Cuenta el efectivo físico e ingrésalo. El sistema registra la diferencia.</DialogDescription>
         </DialogHeader>
         <FieldGroup>
-          <div className="flex justify-between text-sm"><span className="text-muted-foreground">Efectivo esperado</span><span className="font-mono">{soles(esperado)}</span></div>
+          <div className="flex justify-between text-sm"><span className="text-muted-foreground">Efectivo esperado</span><span className="tabular-nums">{soles(esperado)}</span></div>
           <Field>
             <FieldLabel htmlFor="contado">Efectivo contado</FieldLabel>
-            <Input id="contado" inputMode="decimal" className="font-mono" autoFocus value={contado} onChange={(e) => setContado(e.target.value)} />
+            <Input id="contado" inputMode="decimal" className="tabular-nums" autoFocus value={contado} onChange={(e) => setContado(e.target.value)} />
             {dif !== null && !Number.isNaN(dif) && (
               <FieldDescription className={cn(dif !== 0 && "font-medium text-destructive")}>
                 {dif === 0 ? "Cuadra exacto." : dif > 0 ? `Sobrante de ${soles(dif)}` : `Faltante de ${soles(-dif)}`}
@@ -291,9 +291,9 @@ function Historial() {
                   <TableCell>{s.usuario}</TableCell>
                   <TableCell className="text-xs">{hora(s.apertura_at)}</TableCell>
                   <TableCell className="text-xs">{s.cierre_at ? hora(s.cierre_at) : <Badge variant="secondary">Abierta</Badge>}</TableCell>
-                  <TableCell className="text-right font-mono">{s.efectivo_esperado !== null ? soles(s.efectivo_esperado) : "—"}</TableCell>
-                  <TableCell className="text-right font-mono">{s.efectivo_contado !== null ? soles(s.efectivo_contado) : "—"}</TableCell>
-                  <TableCell className={cn("text-right font-mono", s.diferencia && s.diferencia !== 0 && "text-destructive")}>{s.diferencia !== null ? soles(s.diferencia) : "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums">{s.efectivo_esperado !== null ? soles(s.efectivo_esperado) : "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums">{s.efectivo_contado !== null ? soles(s.efectivo_contado) : "—"}</TableCell>
+                  <TableCell className={cn("text-right tabular-nums", s.diferencia && s.diferencia !== 0 && "text-destructive")}>{s.diferencia !== null ? soles(s.diferencia) : "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

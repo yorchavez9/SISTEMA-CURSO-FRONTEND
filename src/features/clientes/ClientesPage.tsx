@@ -128,7 +128,7 @@ export function ClientesPage() {
                 {lista.data?.data.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="whitespace-nowrap">
-                      <Badge variant="outline">{CORTO[c.tipo_documento]}</Badge> <span className="font-mono">{c.numero_documento}</span>
+                      <Badge variant="outline">{CORTO[c.tipo_documento]}</Badge> <span className="tabular-nums">{c.numero_documento}</span>
                     </TableCell>
                     <TableCell className="font-medium">{c.razon_social}{!c.activo && <Badge variant="secondary" className="ml-2">Inactivo</Badge>}</TableCell>
                     <TableCell className="hidden max-w-72 truncate lg:table-cell">{c.direccion ?? "—"}</TableCell>
@@ -249,7 +249,7 @@ export function ClienteDialog({ cliente, onClose, onSaved }: { cliente: ClienteD
               <Field data-invalid={!!errors.numero_documento}>
                 <FieldLabel htmlFor="c-num">Número</FieldLabel>
                 <InputGroup>
-                  <InputGroupInput id="c-num" className="font-mono" aria-invalid={!!errors.numero_documento} {...form.register("numero_documento")} />
+                  <InputGroupInput id="c-num" className="tabular-nums" aria-invalid={!!errors.numero_documento} {...form.register("numero_documento")} />
                   {(tipo === "6" || tipo === "1") && (
                     <InputGroupAddon align="inline-end">
                       <InputGroupButton onClick={consultar} disabled={buscando} aria-label="Consultar en SUNAT/RENIEC">

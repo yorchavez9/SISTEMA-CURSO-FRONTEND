@@ -115,10 +115,10 @@ function Afectaciones({ items }: { items: AfectacionIgv[] }) {
             <TableBody>
               {items.map((a) => (
                 <TableRow key={a.codigo} className={a.activo ? undefined : "opacity-60"}>
-                  <TableCell className="font-mono font-medium">{a.codigo}</TableCell>
+                  <TableCell className="tabular-nums font-medium">{a.codigo}</TableCell>
                   <TableCell>{a.descripcion}</TableCell>
                   <TableCell>{GRUPO[a.grupo]}</TableCell>
-                  <TableCell className="font-mono text-xs">{a.tributo.codigo} {a.tributo.nombre}</TableCell>
+                  <TableCell className="tabular-nums text-xs">{a.tributo.codigo} {a.tributo.nombre}</TableCell>
                   <TableCell>{a.es_gratuito ? <Badge variant="secondary">Gratuita</Badge> : "Onerosa"}</TableCell>
                   <TableCell className="text-xs">
                     {a.calcula_igv ? (a.es_gratuito ? "Se calcula, no se cobra" : "Se calcula y se cobra") : "No aplica"}
@@ -150,7 +150,7 @@ function CatalogoCard({ catalogo, items }: { catalogo: string; items: CatalogoIt
               const nota = (i.meta?.nota as string | undefined) ?? (i.meta?.verificar_con_anexo_vigente ? "Verificar descripción y tasa con el anexo vigente de SUNAT." : null)
               return (
                 <TableRow key={i.codigo}>
-                  <TableCell className="w-16 font-mono">{i.codigo}</TableCell>
+                  <TableCell className="w-16 tabular-nums">{i.codigo}</TableCell>
                   <TableCell>
                     {i.descripcion}
                     {typeof i.meta?.tasa === "number" && <span className="text-muted-foreground"> · {i.meta.tasa}%</span>}

@@ -76,13 +76,13 @@ export function CotizacionesPage() {
               <TableBody>
                 {lista.data?.data.map((c) => (
                   <TableRow key={c.id} className="cursor-pointer" onClick={() => setParams({ ver: String(c.id) })}>
-                    <TableCell><div className="font-mono">{c.codigo}</div><div className="text-xs text-muted-foreground">{fecha(c.fecha_emision)}</div></TableCell>
-                    <TableCell className="max-w-64"><div className="truncate">{c.cliente.razon_social}</div>{c.cliente.num_doc && <div className="font-mono text-xs text-muted-foreground">{c.cliente.num_doc}</div>}</TableCell>
+                    <TableCell><div className="tabular-nums">{c.codigo}</div><div className="text-xs text-muted-foreground">{fecha(c.fecha_emision)}</div></TableCell>
+                    <TableCell className="max-w-64"><div className="truncate">{c.cliente.razon_social}</div>{c.cliente.num_doc && <div className="tabular-nums text-xs text-muted-foreground">{c.cliente.num_doc}</div>}</TableCell>
                     <TableCell>{fecha(c.fecha_validez)}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(c.total, c.moneda)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(c.total, c.moneda)}</TableCell>
                     <TableCell>
                       <EstadoCotizacionBadge estado={c.estado} />
-                      {c.venta?.numero && <div className="mt-1 font-mono text-xs text-muted-foreground">{c.venta.numero}</div>}
+                      {c.venta?.numero && <div className="mt-1 tabular-nums text-xs text-muted-foreground">{c.venta.numero}</div>}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -114,14 +114,14 @@ function DetalleCotizacion({ id, onClose }: { id: number | null; onClose: () => 
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-2xl">
         <SheetHeader>
-          <SheetTitle className="font-mono">{c?.codigo ?? "Cotización"}</SheetTitle>
+          <SheetTitle className="tabular-nums">{c?.codigo ?? "Cotización"}</SheetTitle>
           <SheetDescription>{c ? `Emitida el ${fecha(c.fecha_emision)} · válida hasta el ${fecha(c.fecha_validez)}` : "Cargando…"}</SheetDescription>
         </SheetHeader>
         {!c ? <div className="px-4"><Skeleton className="h-64" /></div> : (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
             <div className="flex flex-wrap items-center gap-2">
               <EstadoCotizacionBadge estado={c.estado} />
-              {c.venta?.numero && <Button variant="link" className="h-auto p-0 font-mono" asChild><Link to={`/comprobantes?ver=${c.venta.comprobante_id}`}>{c.venta.numero}</Link></Button>}
+              {c.venta?.numero && <Button variant="link" className="h-auto p-0 tabular-nums" asChild><Link to={`/comprobantes?ver=${c.venta.comprobante_id}`}>{c.venta.numero}</Link></Button>}
             </div>
             <div className="flex flex-wrap gap-2">
               {c.convertible && puede("comprobantes.emitir") && (
@@ -137,7 +137,7 @@ function DetalleCotizacion({ id, onClose }: { id: number | null; onClose: () => 
             <section>
               <h3 className="mb-1 font-medium">Cliente</h3>
               <p>{c.cliente.razon_social}</p>
-              {c.cliente.num_doc && <p className="font-mono text-muted-foreground">{c.cliente.num_doc}</p>}
+              {c.cliente.num_doc && <p className="tabular-nums text-muted-foreground">{c.cliente.num_doc}</p>}
               {c.cliente.email && <p className="text-muted-foreground">{c.cliente.email}</p>}
             </section>
             <Table>
@@ -148,18 +148,18 @@ function DetalleCotizacion({ id, onClose }: { id: number | null; onClose: () => 
                 {c.items.map((i, n) => (
                   <TableRow key={n}>
                     <TableCell>{i.descripcion}{i.descuento > 0 && <div className="text-xs text-muted-foreground">Descuento {soles(i.descuento, c.moneda)}</div>}</TableCell>
-                    <TableCell className="text-right font-mono">{i.cantidad} {i.unidad}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(i.precio_unitario, c.moneda)}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(i.total, c.moneda)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{i.cantidad} {i.unidad}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(i.precio_unitario, c.moneda)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(i.total, c.moneda)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
               <TableFooter>
-                {c.totales.gravadas > 0 && <TableRow><TableCell colSpan={3} className="text-right">Op. gravadas</TableCell><TableCell className="text-right font-mono">{soles(c.totales.gravadas, c.moneda)}</TableCell></TableRow>}
-                {c.totales.exoneradas > 0 && <TableRow><TableCell colSpan={3} className="text-right">Op. exoneradas</TableCell><TableCell className="text-right font-mono">{soles(c.totales.exoneradas, c.moneda)}</TableCell></TableRow>}
-                {c.totales.inafectas > 0 && <TableRow><TableCell colSpan={3} className="text-right">Op. inafectas</TableCell><TableCell className="text-right font-mono">{soles(c.totales.inafectas, c.moneda)}</TableCell></TableRow>}
-                <TableRow><TableCell colSpan={3} className="text-right">IGV ({c.tasa_igv} %)</TableCell><TableCell className="text-right font-mono">{soles(c.totales.igv, c.moneda)}</TableCell></TableRow>
-                <TableRow><TableCell colSpan={3} className="text-right font-medium">Total</TableCell><TableCell className="text-right font-mono font-medium">{soles(c.totales.total, c.moneda)}</TableCell></TableRow>
+                {c.totales.gravadas > 0 && <TableRow><TableCell colSpan={3} className="text-right">Op. gravadas</TableCell><TableCell className="text-right tabular-nums">{soles(c.totales.gravadas, c.moneda)}</TableCell></TableRow>}
+                {c.totales.exoneradas > 0 && <TableRow><TableCell colSpan={3} className="text-right">Op. exoneradas</TableCell><TableCell className="text-right tabular-nums">{soles(c.totales.exoneradas, c.moneda)}</TableCell></TableRow>}
+                {c.totales.inafectas > 0 && <TableRow><TableCell colSpan={3} className="text-right">Op. inafectas</TableCell><TableCell className="text-right tabular-nums">{soles(c.totales.inafectas, c.moneda)}</TableCell></TableRow>}
+                <TableRow><TableCell colSpan={3} className="text-right">IGV ({c.tasa_igv} %)</TableCell><TableCell className="text-right tabular-nums">{soles(c.totales.igv, c.moneda)}</TableCell></TableRow>
+                <TableRow><TableCell colSpan={3} className="text-right font-medium">Total</TableCell><TableCell className="text-right tabular-nums font-medium">{soles(c.totales.total, c.moneda)}</TableCell></TableRow>
               </TableFooter>
             </Table>
             {c.observacion && <section><h3 className="mb-1 font-medium">Observaciones</h3><p className="whitespace-pre-line text-muted-foreground">{c.observacion}</p></section>}

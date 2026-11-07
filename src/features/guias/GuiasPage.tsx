@@ -123,7 +123,7 @@ export function GuiasPage() {
                 {lista.data?.data.map((g) => (
                   <TableRow key={g.id} className="cursor-pointer" onClick={() => setParams({ ver: String(g.id) })}>
                     <TableCell>
-                      <div className="font-mono">{g.numero}</div>
+                      <div className="tabular-nums">{g.numero}</div>
                       <div className="text-xs text-muted-foreground">{g.comprobante ? `Sustenta ${g.comprobante.numero}` : g.fecha_emision}</div>
                     </TableCell>
                     <TableCell>
@@ -132,7 +132,7 @@ export function GuiasPage() {
                     </TableCell>
                     <TableCell className="max-w-64">
                       <div className="truncate">{g.destinatario.razon_social}</div>
-                      <div className="font-mono text-xs text-muted-foreground">{g.destinatario.num_doc}</div>
+                      <div className="tabular-nums text-xs text-muted-foreground">{g.destinatario.num_doc}</div>
                     </TableCell>
                     <TableCell><EstadoGuiaBadge estado={g.estado} /></TableCell>
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
@@ -168,7 +168,7 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
     <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
       <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
         <SheetHeader>
-          <SheetTitle className="font-mono">{g?.numero ?? "Guía de remisión"}</SheetTitle>
+          <SheetTitle className="tabular-nums">{g?.numero ?? "Guía de remisión"}</SheetTitle>
           <SheetDescription>{g ? `${g.motivo} · ${g.modalidad}` : "Cargando…"}</SheetDescription>
         </SheetHeader>
         {!g ? <div className="px-4"><Skeleton className="h-64" /></div> : (
@@ -197,8 +197,8 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
 
             <Seccion titulo="Destinatario">
               <p>{g.destinatario.razon_social}</p>
-              <p className="font-mono text-muted-foreground">{g.destinatario.num_doc}</p>
-              {g.comprobante && <p className="text-muted-foreground">Sustenta el comprobante <span className="font-mono">{g.comprobante.numero}</span></p>}
+              <p className="tabular-nums text-muted-foreground">{g.destinatario.num_doc}</p>
+              {g.comprobante && <p className="text-muted-foreground">Sustenta el comprobante <span className="tabular-nums">{g.comprobante.numero}</span></p>}
             </Seccion>
             <Seccion titulo="Traslado">
               <Dato k="Fecha de traslado" v={g.fecha_traslado} />
@@ -219,8 +219,8 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
                 <TableBody>
                   {g.items.map((i, n) => (
                     <TableRow key={n}>
-                      <TableCell>{i.descripcion}{i.codigo && <div className="font-mono text-xs text-muted-foreground">{i.codigo}</div>}</TableCell>
-                      <TableCell className="text-right font-mono">{i.cantidad} {i.unidad}</TableCell>
+                      <TableCell>{i.descripcion}{i.codigo && <div className="tabular-nums text-xs text-muted-foreground">{i.codigo}</div>}</TableCell>
+                      <TableCell className="text-right tabular-nums">{i.cantidad} {i.unidad}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

@@ -85,7 +85,7 @@ export function EmpresasPage() {
               <TableBody>
                 {empresas.data?.map((e) => (
                   <TableRow key={e.id}>
-                    <TableCell className="font-mono">{e.ruc}</TableCell>
+                    <TableCell className="tabular-nums">{e.ruc}</TableCell>
                     <TableCell className="font-medium">{e.razon_social}</TableCell>
                     <TableCell className="hidden max-w-64 truncate md:table-cell">{e.direccion ?? "—"}</TableCell>
                     <TableCell>

@@ -48,13 +48,13 @@ export function CuentasPorCobrarPage() {
       <PageHeader title="Cuentas por cobrar" description="Saldos pendientes de ventas al crédito o no cobradas, por antigüedad." />
       <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-6">
         <Card className="sm:col-span-3 lg:col-span-1">
-          <CardHeader><CardDescription>Total por cobrar</CardDescription><CardTitle className="font-mono text-2xl">{lista.data ? soles(lista.data.total) : "—"}</CardTitle></CardHeader>
+          <CardHeader><CardDescription>Total por cobrar</CardDescription><CardTitle className="tabular-nums text-2xl">{lista.data ? soles(lista.data.total) : "—"}</CardTitle></CardHeader>
         </Card>
         {TRAMOS.map(([k, label]) => (
           <Card key={k}>
             <CardHeader>
               <CardDescription>{label}</CardDescription>
-              <CardTitle className={cn("font-mono text-lg", k !== "al_dia" && (lista.data?.tramos[k] ?? 0) > 0 && "text-destructive")}>{lista.data ? soles(lista.data.tramos[k]) : "—"}</CardTitle>
+              <CardTitle className={cn("tabular-nums text-lg", k !== "al_dia" && (lista.data?.tramos[k] ?? 0) > 0 && "text-destructive")}>{lista.data ? soles(lista.data.tramos[k]) : "—"}</CardTitle>
             </CardHeader>
           </Card>
         ))}
@@ -77,14 +77,14 @@ export function CuentasPorCobrarPage() {
               <TableBody>
                 {lista.data?.filas.map((f) => (
                   <TableRow key={f.venta_id}>
-                    <TableCell><div className="font-mono">{f.comprobante ?? `Venta #${f.venta_id}`}</div><div className="text-xs text-muted-foreground">{f.fecha} · {f.forma_pago}</div></TableCell>
-                    <TableCell className="max-w-56"><div className="truncate">{f.cliente}</div><div className="font-mono text-xs text-muted-foreground">{f.cliente_doc}</div></TableCell>
+                    <TableCell><div className="tabular-nums">{f.comprobante ?? `Venta #${f.venta_id}`}</div><div className="text-xs text-muted-foreground">{f.fecha} · {f.forma_pago}</div></TableCell>
+                    <TableCell className="max-w-56"><div className="truncate">{f.cliente}</div><div className="tabular-nums text-xs text-muted-foreground">{f.cliente_doc}</div></TableCell>
                     <TableCell>
                       {f.proximo_vencimiento ?? "—"}
                       {f.dias_vencido > 0 && <Badge variant="destructive" className="ml-2">{f.dias_vencido} d vencido</Badge>}
                     </TableCell>
-                    <TableCell className="text-right font-mono">{soles(f.total)}</TableCell>
-                    <TableCell className="text-right font-mono font-medium">{soles(f.saldo)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(f.total)}</TableCell>
+                    <TableCell className="text-right tabular-nums font-medium">{soles(f.saldo)}</TableCell>
                     <TableCell className="text-right"><Button size="sm" variant="outline" onClick={() => setVentaId(f.venta_id)}><HandCoinsIcon /> Cobrar</Button></TableCell>
                   </TableRow>
                 ))}
@@ -107,10 +107,10 @@ export function CuentasPorCobrarPage() {
               <TableBody>
                 {lista.data?.saldos_a_favor.map((f) => (
                   <TableRow key={f.venta_id}>
-                    <TableCell><div className="font-mono">{f.comprobante ?? `Venta #${f.venta_id}`}</div><div className="text-xs text-muted-foreground">{f.fecha}{f.comprobante_estado === "anulado" && " · dado de baja"}</div></TableCell>
-                    <TableCell className="max-w-56"><div className="truncate">{f.cliente}</div><div className="font-mono text-xs text-muted-foreground">{f.cliente_doc}</div></TableCell>
-                    <TableCell className="text-right font-mono">{soles(f.pagado)}</TableCell>
-                    <TableCell className="text-right font-mono font-medium">{soles(f.a_favor)}</TableCell>
+                    <TableCell><div className="tabular-nums">{f.comprobante ?? `Venta #${f.venta_id}`}</div><div className="text-xs text-muted-foreground">{f.fecha}{f.comprobante_estado === "anulado" && " · dado de baja"}</div></TableCell>
+                    <TableCell className="max-w-56"><div className="truncate">{f.cliente}</div><div className="tabular-nums text-xs text-muted-foreground">{f.cliente_doc}</div></TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(f.pagado)}</TableCell>
+                    <TableCell className="text-right tabular-nums font-medium">{soles(f.a_favor)}</TableCell>
                     <TableCell className="text-right">
                       {puede("caja.operar") && <Button size="sm" variant="outline" onClick={() => setReembolso(f)}><Undo2Icon /> Reembolsar</Button>}
                     </TableCell>
@@ -164,9 +164,9 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
         {!d ? <Skeleton className="h-40" /> : (
           <div className="flex flex-col gap-4 text-sm">
             <div className="grid grid-cols-3 gap-2 text-center">
-              <div><div className="text-muted-foreground">Total</div><div className="font-mono">{soles(d.total)}</div></div>
-              <div><div className="text-muted-foreground">Pagado</div><div className="font-mono">{soles(d.pagado)}</div></div>
-              <div><div className="text-muted-foreground">Saldo</div><div className="font-mono font-semibold">{soles(d.saldo)}</div></div>
+              <div><div className="text-muted-foreground">Total</div><div className="tabular-nums">{soles(d.total)}</div></div>
+              <div><div className="text-muted-foreground">Pagado</div><div className="tabular-nums">{soles(d.pagado)}</div></div>
+              <div><div className="text-muted-foreground">Saldo</div><div className="tabular-nums font-semibold">{soles(d.saldo)}</div></div>
             </div>
             {d.cuotas.length > 0 && (
               <Table>
@@ -174,7 +174,7 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
                   {d.cuotas.map((c) => (
                     <TableRow key={c.numero}>
                       <TableCell>Cuota {c.numero} · {c.fecha_vencimiento}</TableCell>
-                      <TableCell className="text-right font-mono">{soles(c.pagado)} / {soles(c.monto)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{soles(c.pagado)} / {soles(c.monto)}</TableCell>
                       <TableCell className="w-24 text-right">{c.pagado >= c.monto ? <Badge variant="outline">Pagada</Badge> : c.pagado > 0 ? <Badge variant="secondary">Parcial</Badge> : null}</TableCell>
                     </TableRow>
                   ))}
@@ -201,7 +201,7 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
                       <TableRow key={p.id} className={p.estado === "anulado" ? "opacity-60" : undefined}>
                         <TableCell className="text-xs">{new Date(p.fecha).toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" })}<div>{p.usuario}</div></TableCell>
                         <TableCell>{p.metodo}{p.referencia && <div className="text-xs text-muted-foreground">{p.referencia}</div>}{p.motivo_anulacion && <div className="text-xs text-destructive">Anulado: {p.motivo_anulacion}</div>}</TableCell>
-                        <TableCell className="text-right font-mono">{soles(p.monto)}</TableCell>
+                        <TableCell className="text-right tabular-nums">{soles(p.monto)}</TableCell>
                         <TableCell className="w-10">
                           {p.estado === "registrado" && puede("caja.operar") && (
                             <Button variant="ghost" size="icon" aria-label="Anular pago" onClick={() => setAnular(p.id)}><Undo2Icon /></Button>
@@ -259,7 +259,7 @@ function ReembolsoDialog({ saldo, onClose }: { saldo: AFavor; onClose: () => voi
               <SelectTrigger aria-label="Método"><SelectValue /></SelectTrigger>
               <SelectContent>{caja.data.metodos.map((x) => <SelectItem key={x.metodo} value={x.metodo}>{x.label}</SelectItem>)}</SelectContent>
             </Select>
-            <Input inputMode="decimal" className="font-mono" aria-label="Monto" value={monto} onChange={(e) => setMonto(e.target.value)} />
+            <Input inputMode="decimal" className="tabular-nums" aria-label="Monto" value={monto} onChange={(e) => setMonto(e.target.value)} />
             {metodo !== "efectivo" && <Input className="sm:col-span-2" placeholder="N.º de operación" aria-label="Referencia" value={referencia} onChange={(e) => setReferencia(e.target.value)} />}
           </div>
         )}

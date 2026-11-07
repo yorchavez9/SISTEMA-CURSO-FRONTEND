@@ -136,7 +136,7 @@ export function ProductosPage() {
               <TableBody>
                 {lista.data?.data.map((p) => (
                   <TableRow key={p.id}>
-                    <TableCell className="font-mono">{p.codigo}</TableCell>
+                    <TableCell className="tabular-nums">{p.codigo}</TableCell>
                     <TableCell>
                       <div className="font-medium">{p.descripcion}</div>
                       <div className="flex flex-wrap gap-1 pt-1">
@@ -147,8 +147,8 @@ export function ProductosPage() {
                         {!p.activo && <Badge variant="destructive">Inactivo</Badge>}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden max-w-56 text-sm md:table-cell"><span className="font-mono">{p.tip_afe_igv}</span> · {afeLabel(p.tip_afe_igv)}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(p.precio_venta, p.moneda)}</TableCell>
+                    <TableCell className="hidden max-w-56 text-sm md:table-cell"><span className="tabular-nums">{p.tip_afe_igv}</span> · {afeLabel(p.tip_afe_igv)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(p.precio_venta, p.moneda)}</TableCell>
                     <TableCell>
                       {(puede("productos.editar") || puede("productos.eliminar")) && (
                         <DropdownMenu>
@@ -220,7 +220,7 @@ function CodigoSunatCombobox({ value, onChange }: { value: string; onChange: (v:
               {res.data?.map((c) => (
                 <CommandItem key={c.codigo} value={c.codigo} onSelect={() => { onChange(c.codigo); setOpen(false) }}>
                   <CheckIcon className={cn(value === c.codigo ? "opacity-100" : "opacity-0")} />
-                  <span className="font-mono text-xs">{c.codigo}</span>
+                  <span className="tabular-nums text-xs">{c.codigo}</span>
                   <span className="truncate">{c.descripcion}</span>
                 </CommandItem>
               ))}
@@ -319,7 +319,7 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
               <div className="grid gap-4 sm:grid-cols-[10rem_1fr_9rem]">
                 <Field data-invalid={!!errors.codigo}>
                   <FieldLabel htmlFor="p-cod">Código</FieldLabel>
-                  <Input id="p-cod" className="font-mono" aria-invalid={!!errors.codigo} {...form.register("codigo")} />
+                  <Input id="p-cod" className="tabular-nums" aria-invalid={!!errors.codigo} {...form.register("codigo")} />
                   <FieldError errors={[errors.codigo]} />
                 </Field>
                 <Field data-invalid={!!errors.descripcion}>
@@ -389,12 +389,12 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
               <div className="grid gap-4 sm:grid-cols-[1fr_1fr_2fr]">
                 <Field data-invalid={!!errors.precio_venta}>
                   <FieldLabel htmlFor="p-precio">Precio de venta</FieldLabel>
-                  <Input id="p-precio" inputMode="decimal" className="font-mono" aria-invalid={!!errors.precio_venta} {...form.register("precio_venta")} />
+                  <Input id="p-precio" inputMode="decimal" className="tabular-nums" aria-invalid={!!errors.precio_venta} {...form.register("precio_venta")} />
                   <FieldError errors={[errors.precio_venta]} />
                 </Field>
                 <Field data-invalid={!!errors.costo}>
                   <FieldLabel htmlFor="p-costo">Costo</FieldLabel>
-                  <Input id="p-costo" inputMode="decimal" className="font-mono" aria-invalid={!!errors.costo} {...form.register("costo")} />
+                  <Input id="p-costo" inputMode="decimal" className="tabular-nums" aria-invalid={!!errors.costo} {...form.register("costo")} />
                   <FieldError errors={[errors.costo]} />
                 </Field>
                 <Field data-invalid={!!errors.tip_afe_igv}>

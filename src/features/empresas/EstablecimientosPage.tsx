@@ -108,7 +108,7 @@ export function EstablecimientosPage() {
           <CardHeader>
             <CardTitle className="flex flex-wrap items-center gap-2">
               {e.nombre}
-              <Badge variant="outline" className="font-mono">{e.cod_local}</Badge>
+              <Badge variant="outline" className="tabular-nums">{e.cod_local}</Badge>
               {e.es_principal && <Badge variant="secondary">Principal</Badge>}
             </CardTitle>
             <CardDescription>{e.direccion ?? "Sin dirección registrada"}</CardDescription>
@@ -181,9 +181,9 @@ function SeriesTabla({ series, tipoLabel, editar, onDone }: { series: SerieDto[]
         {series.map((s) => (
           <TableRow key={s.id} className={s.activo ? undefined : "opacity-60"}>
             <TableCell>{tipoLabel(s.tipo_documento)}</TableCell>
-            <TableCell className="font-mono font-medium">{s.serie}</TableCell>
-            <TableCell className="text-right font-mono">{s.correlativo_actual}</TableCell>
-            <TableCell className="font-mono">{s.siguiente_numero}</TableCell>
+            <TableCell className="tabular-nums font-medium">{s.serie}</TableCell>
+            <TableCell className="text-right tabular-nums">{s.correlativo_actual}</TableCell>
+            <TableCell className="tabular-nums">{s.siguiente_numero}</TableCell>
             <TableCell>
               <Switch
                 checked={s.activo}
@@ -317,7 +317,7 @@ function NuevaSerie({ establecimiento, tipoLabel, onDone }: { establecimiento: E
           </Field>
           <Field data-invalid={!!error}>
             <FieldLabel htmlFor="s-serie">Serie</FieldLabel>
-            <Input id="s-serie" maxLength={4} placeholder={PREFIJO[tipo]} className="font-mono uppercase" value={serie} onChange={(e) => setSerie(e.target.value)} aria-invalid={!!error} />
+            <Input id="s-serie" maxLength={4} placeholder={PREFIJO[tipo]} className="tabular-nums uppercase" value={serie} onChange={(e) => setSerie(e.target.value)} aria-invalid={!!error} />
             <FieldDescription>4 caracteres. Facturas empiezan con F, boletas con B; las notas con F o B según el documento que modifican.</FieldDescription>
             {error && <FieldError>{error}</FieldError>}
           </Field>

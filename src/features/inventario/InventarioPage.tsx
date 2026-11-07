@@ -93,7 +93,7 @@ export function InventarioPage() {
         <Card>
           <CardHeader>
             <CardDescription>Valor del inventario en el almacén</CardDescription>
-            <CardTitle className="font-mono text-2xl">{stock.data ? soles(stock.data.meta.valor_total) : "—"}</CardTitle>
+            <CardTitle className="tabular-nums text-2xl">{stock.data ? soles(stock.data.meta.valor_total) : "—"}</CardTitle>
           </CardHeader>
         </Card>
         {puede("empresas.editar") && empresa && (
@@ -140,13 +140,13 @@ export function InventarioPage() {
               <TableBody>
                 {stock.data?.data.map((f) => (
                   <TableRow key={f.producto_id}>
-                    <TableCell><div className="font-medium">{f.descripcion}</div><div className="font-mono text-xs text-muted-foreground">{f.codigo} · {f.unidad}</div></TableCell>
-                    <TableCell className={cn("text-right font-mono", f.cantidad < 0 && "text-destructive")}>
+                    <TableCell><div className="font-medium">{f.descripcion}</div><div className="tabular-nums text-xs text-muted-foreground">{f.codigo} · {f.unidad}</div></TableCell>
+                    <TableCell className={cn("text-right tabular-nums", f.cantidad < 0 && "text-destructive")}>
                       {num(f.cantidad)} {f.bajo_minimo && <Badge variant="destructive" className="ml-1">Bajo mínimo</Badge>}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-muted-foreground">{num(f.stock_minimo)}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(f.costo_promedio)}</TableCell>
-                    <TableCell className="text-right font-mono">{soles(f.valor)}</TableCell>
+                    <TableCell className="text-right tabular-nums text-muted-foreground">{num(f.stock_minimo)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(f.costo_promedio)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(f.valor)}</TableCell>
                     <TableCell><Button variant="ghost" size="icon" aria-label={`Kardex de ${f.descripcion}`} onClick={() => setKardexId(f.producto_id)}><HistoryIcon /></Button></TableCell>
                   </TableRow>
                 ))}
@@ -250,9 +250,9 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
               <TableBody>
                 {lineas.map((l, i) => (
                   <TableRow key={l.producto.id}>
-                    <TableCell>{l.producto.descripcion}<div className="font-mono text-xs text-muted-foreground">{l.producto.codigo}</div></TableCell>
-                    <TableCell><Input inputMode="decimal" className="font-mono" aria-label="Cantidad" value={l.cantidad} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, cantidad: e.target.value } : x)))} /></TableCell>
-                    {op === "entrada" && <TableCell><Input inputMode="decimal" className="font-mono" aria-label="Costo unitario" value={l.costo} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, costo: e.target.value } : x)))} /></TableCell>}
+                    <TableCell>{l.producto.descripcion}<div className="tabular-nums text-xs text-muted-foreground">{l.producto.codigo}</div></TableCell>
+                    <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Cantidad" value={l.cantidad} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, cantidad: e.target.value } : x)))} /></TableCell>
+                    {op === "entrada" && <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Costo unitario" value={l.costo} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, costo: e.target.value } : x)))} /></TableCell>}
                     <TableCell><Button variant="ghost" size="icon" aria-label="Quitar" onClick={() => setLineas((ls) => ls.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
                   </TableRow>
                 ))}
@@ -291,7 +291,7 @@ function ProductoPicker({ onSelect }: { onSelect: (p: ProductoDto) => void }) {
             <CommandGroup>
               {res.data?.map((p) => (
                 <CommandItem key={p.id} value={String(p.id)} onSelect={() => { onSelect(p); setOpen(false); setQ("") }}>
-                  <span className="truncate">{p.descripcion}</span><span className="ml-auto font-mono text-xs text-muted-foreground">{p.codigo}</span>
+                  <span className="truncate">{p.descripcion}</span><span className="ml-auto tabular-nums text-xs text-muted-foreground">{p.codigo}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -331,10 +331,10 @@ function KardexSheet({ productoId, almacenId, onClose }: { productoId: number | 
                     <TableCell className="whitespace-nowrap text-xs">{new Date(m.fecha).toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" })}<div className="text-muted-foreground">{m.usuario}</div></TableCell>
                     <TableCell><Badge variant={m.sentido === "entrada" ? "outline" : "secondary"}>{TIPOS[m.tipo] ?? m.tipo}</Badge></TableCell>
                     <TableCell className="text-xs">{m.documento ?? "—"}{m.observacion && <div className="text-muted-foreground">{m.observacion}</div>}</TableCell>
-                    <TableCell className={cn("text-right font-mono", m.sentido === "salida" && "text-destructive")}>{m.sentido === "salida" ? "−" : "+"}{num(m.cantidad)}</TableCell>
-                    <TableCell className="text-right font-mono">{m.costo_unitario.toFixed(4)}</TableCell>
-                    <TableCell className={cn("text-right font-mono font-medium", m.saldo_cantidad < 0 && "text-destructive")}>{num(m.saldo_cantidad)}</TableCell>
-                    <TableCell className="text-right font-mono">{m.saldo_costo_promedio.toFixed(4)}</TableCell>
+                    <TableCell className={cn("text-right tabular-nums", m.sentido === "salida" && "text-destructive")}>{m.sentido === "salida" ? "−" : "+"}{num(m.cantidad)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{m.costo_unitario.toFixed(4)}</TableCell>
+                    <TableCell className={cn("text-right tabular-nums font-medium", m.saldo_cantidad < 0 && "text-destructive")}>{num(m.saldo_cantidad)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{m.saldo_costo_promedio.toFixed(4)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

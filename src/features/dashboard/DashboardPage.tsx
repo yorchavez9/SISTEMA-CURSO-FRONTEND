@@ -95,7 +95,7 @@ export function DashboardPage() {
                   <XAxis dataKey="fecha" tickLine={false} axisLine={false} tickMargin={8} minTickGap={24} tickFormatter={corto} />
                   <YAxis tickLine={false} axisLine={false} width={44} tickFormatter={compacto} />
                   <ChartTooltip cursor={{ fillOpacity: 0.08 }}
-                    content={<ChartTooltipContent labelFormatter={(_, p) => corto(p?.[0]?.payload?.fecha ?? "")} formatter={(v) => <span className="font-mono">{soles(Number(v))}</span>} />} />
+                    content={<ChartTooltipContent labelFormatter={(_, p) => corto(p?.[0]?.payload?.fecha ?? "")} formatter={(v) => <span className="tabular-nums">{soles(Number(v))}</span>} />} />
                   <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} maxBarSize={24} />
                 </BarChart>
               </ChartContainer>
@@ -113,7 +113,7 @@ export function DashboardPage() {
                 {d.por_estado.filter((e) => e.cantidad > 0).map((e) => (
                   <li key={e.estado} className="flex items-center justify-between">
                     <EstadoBadge estado={e.estado as Parameters<typeof EstadoBadge>[0]["estado"]} />
-                    <span className="font-mono">{e.cantidad}</span>
+                    <span className="tabular-nums">{e.cantidad}</span>
                   </li>
                 ))}
                 {d.por_estado.every((e) => e.cantidad === 0) && <li className="text-sm text-muted-foreground">Sin comprobantes este mes.</li>}
@@ -137,9 +137,9 @@ export function DashboardPage() {
                   <YAxis type="category" dataKey="descripcion" tickLine={false} axisLine={false} width={150}
                     tickFormatter={(v: string) => (v.length > 22 ? v.slice(0, 21) + "…" : v)} />
                   <ChartTooltip cursor={{ fillOpacity: 0.08 }}
-                    content={<ChartTooltipContent formatter={(v, _n, p) => <span className="font-mono">{soles(Number(v))} · {p.payload.cantidad} und.</span>} />} />
+                    content={<ChartTooltipContent formatter={(v, _n, p) => <span className="tabular-nums">{soles(Number(v))} · {p.payload.cantidad} und.</span>} />} />
                   <Bar dataKey="total" fill="var(--color-total)" radius={[0, 4, 4, 0]} maxBarSize={20}
-                    label={{ position: "right", className: "fill-muted-foreground font-mono text-xs", formatter: (v: unknown) => compacto(Number(v)) }} />
+                    label={{ position: "right", className: "fill-muted-foreground tabular-nums text-xs", formatter: (v: unknown) => compacto(Number(v)) }} />
                 </BarChart>
               </ChartContainer>
             )}
@@ -156,8 +156,8 @@ export function DashboardPage() {
                 <TableBody>
                   {d.top_clientes.map((c) => (
                     <TableRow key={c.documento}>
-                      <TableCell className="max-w-64"><div className="truncate">{c.nombre}</div><div className="font-mono text-xs text-muted-foreground">{c.documento} · {c.compras} compra{c.compras === 1 ? "" : "s"}</div></TableCell>
-                      <TableCell className="text-right font-mono">{soles(c.total)}</TableCell>
+                      <TableCell className="max-w-64"><div className="truncate">{c.nombre}</div><div className="tabular-nums text-xs text-muted-foreground">{c.documento} · {c.compras} compra{c.compras === 1 ? "" : "s"}</div></TableCell>
+                      <TableCell className="text-right tabular-nums">{soles(c.total)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -178,9 +178,9 @@ export function DashboardPage() {
               <TableBody>
                 {d.recientes.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell><Link className="font-mono underline-offset-4 hover:underline" to={`/comprobantes?ver=${r.id}`}>{r.numero}</Link></TableCell>
+                    <TableCell><Link className="tabular-nums underline-offset-4 hover:underline" to={`/comprobantes?ver=${r.id}`}>{r.numero}</Link></TableCell>
                     <TableCell className="max-w-64 truncate">{r.cliente}</TableCell>
-                    <TableCell className={cn("text-right font-mono", r.tipo_documento === "07" && "text-destructive")}>{r.tipo_documento === "07" ? "−" : ""}{soles(r.total, r.moneda)}</TableCell>
+                    <TableCell className={cn("text-right tabular-nums", r.tipo_documento === "07" && "text-destructive")}>{r.tipo_documento === "07" ? "−" : ""}{soles(r.total, r.moneda)}</TableCell>
                     <TableCell><EstadoBadge estado={r.estado as Parameters<typeof EstadoBadge>[0]["estado"]} /></TableCell>
                   </TableRow>
                 ))}
@@ -198,7 +198,7 @@ function Kpi({ label, valor, extra }: { label: string; valor?: string | false; e
     <Card>
       <CardHeader>
         <CardDescription>{label}</CardDescription>
-        <CardTitle className="font-mono text-2xl">{valor ?? <Skeleton className="h-8 w-32" />}</CardTitle>
+        <CardTitle className="tabular-nums text-2xl">{valor ?? <Skeleton className="h-8 w-32" />}</CardTitle>
         {extra}
       </CardHeader>
     </Card>

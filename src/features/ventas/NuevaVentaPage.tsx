@@ -268,7 +268,7 @@ export function NuevaVentaPage() {
                         <SelectContent>{seriesTipo.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.serie}</SelectItem>)}</SelectContent>
                       </Select>
                     )}
-                    {serieSel && <FieldDescription>Siguiente: <span className="font-mono">{serieSel.siguiente_numero}</span></FieldDescription>}
+                    {serieSel && <FieldDescription>Siguiente: <span className="tabular-nums">{serieSel.siguiente_numero}</span></FieldDescription>}
                   </Field>
                   <Field>
                     <FieldLabel>Cliente</FieldLabel>
@@ -322,17 +322,17 @@ export function NuevaVentaPage() {
                         <TableRow key={l.key}>
                           <TableCell>
                             {l.producto_id ? (
-                              <div><div className="font-medium">{l.descripcion}</div><div className="font-mono text-xs text-muted-foreground">{l.codigo} · {l.unidad}</div></div>
+                              <div><div className="font-medium">{l.descripcion}</div><div className="tabular-nums text-xs text-muted-foreground">{l.codigo} · {l.unidad}</div></div>
                             ) : (
                               <Input value={l.descripcion} placeholder="Descripción" aria-label="Descripción del ítem" onChange={(e) => cambiar(l.key, { descripcion: e.target.value })} />
                             )}
                           </TableCell>
-                          <TableCell><Input inputMode="decimal" className="font-mono" aria-label="Cantidad" value={l.cantidad} onChange={(e) => cambiar(l.key, { cantidad: e.target.value })} /></TableCell>
+                          <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Cantidad" value={l.cantidad} onChange={(e) => cambiar(l.key, { cantidad: e.target.value })} /></TableCell>
                           <TableCell>
                             {grat ? (
-                              <Input inputMode="decimal" className="font-mono" aria-label="Valor referencial" title="Valor referencial (operación gratuita)" placeholder="Valor ref." value={l.valor_referencial} onChange={(e) => cambiar(l.key, { valor_referencial: e.target.value })} />
+                              <Input inputMode="decimal" className="tabular-nums" aria-label="Valor referencial" title="Valor referencial (operación gratuita)" placeholder="Valor ref." value={l.valor_referencial} onChange={(e) => cambiar(l.key, { valor_referencial: e.target.value })} />
                             ) : (
-                              <Input inputMode="decimal" className="font-mono" aria-label="Precio unitario" value={l.precio} onChange={(e) => cambiar(l.key, { precio: e.target.value })} />
+                              <Input inputMode="decimal" className="tabular-nums" aria-label="Precio unitario" value={l.precio} onChange={(e) => cambiar(l.key, { precio: e.target.value })} />
                             )}
                           </TableCell>
                           <TableCell>
@@ -341,8 +341,8 @@ export function NuevaVentaPage() {
                               <SelectContent>{afectaciones.map((a) => <SelectItem key={a.codigo} value={a.codigo}>{a.codigo} · {a.descripcion}</SelectItem>)}</SelectContent>
                             </Select>
                           </TableCell>
-                          <TableCell><Input inputMode="decimal" className="font-mono" aria-label="Descuento" disabled={grat} value={l.descuento} onChange={(e) => cambiar(l.key, { descuento: e.target.value })} /></TableCell>
-                          <TableCell className="text-right font-mono">
+                          <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Descuento" disabled={grat} value={l.descuento} onChange={(e) => cambiar(l.key, { descuento: e.target.value })} /></TableCell>
+                          <TableCell className="text-right tabular-nums">
                             {calc ? (calc.gratuito ? <Badge variant="secondary">Gratuito</Badge> : soles(Number(calc.total))) : "—"}
                           </TableCell>
                           <TableCell><Button variant="ghost" size="icon" aria-label="Quitar ítem" onClick={() => quitar(l.key)}><Trash2Icon /></Button></TableCell>
@@ -372,7 +372,7 @@ export function NuevaVentaPage() {
                   </Field>
                   <Field>
                     <FieldLabel htmlFor="dg">Descuento global (afecta la base)</FieldLabel>
-                    <Input id="dg" inputMode="decimal" className="font-mono" placeholder="0.00" value={descuentoGlobal} onChange={(e) => setDescuentoGlobal(e.target.value)} />
+                    <Input id="dg" inputMode="decimal" className="tabular-nums" placeholder="0.00" value={descuentoGlobal} onChange={(e) => setDescuentoGlobal(e.target.value)} />
                     <FieldDescription>Monto sin IGV, como en el ejemplo “Factura descuento global”.</FieldDescription>
                   </Field>
                 </div>
@@ -394,14 +394,14 @@ export function NuevaVentaPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium">Cuotas</span>
                       {[1, 2, 3, 6].map((n) => <Button key={n} type="button" size="sm" variant="outline" onClick={() => repartirCuotas(n)}>{n}</Button>)}
-                      <span className={cn("ml-auto font-mono text-sm", Math.abs(sumaCuotas - Number(total)) > 0.001 && "text-destructive")}>
+                      <span className={cn("ml-auto tabular-nums text-sm", Math.abs(sumaCuotas - Number(total)) > 0.001 && "text-destructive")}>
                         {soles(sumaCuotas)} / {soles(Number(total))}
                       </span>
                     </div>
                     {cuotas.map((c, i) => (
                       <div key={i} className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2">
                         <span className="w-6 text-sm text-muted-foreground">{i + 1}</span>
-                        <Input inputMode="decimal" className="font-mono" aria-label={`Monto cuota ${i + 1}`} value={c.monto} onChange={(e) => setCuotas((cs) => cs.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
+                        <Input inputMode="decimal" className="tabular-nums" aria-label={`Monto cuota ${i + 1}`} value={c.monto} onChange={(e) => setCuotas((cs) => cs.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
                         <Input type="date" aria-label={`Vencimiento cuota ${i + 1}`} value={c.fecha} onChange={(e) => setCuotas((cs) => cs.map((x, j) => (j === i ? { ...x, fecha: e.target.value } : x)))} />
                         <Button type="button" variant="ghost" size="icon" aria-label="Quitar cuota" onClick={() => setCuotas((cs) => cs.filter((_, j) => j !== i))}><XIcon /></Button>
                       </div>
@@ -428,12 +428,12 @@ export function NuevaVentaPage() {
           <CardContent className="flex flex-col gap-2 text-sm">
             {preview.isFetching && !preview.data && <Skeleton className="h-24" />}
             {ETIQUETAS.filter(([k]) => Number(preview.data?.totales[k] ?? 0) !== 0).map(([k, label]) => (
-              <div key={k} className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-mono">{soles(Number(preview.data!.totales[k]))}</span></div>
+              <div key={k} className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="tabular-nums">{soles(Number(preview.data!.totales[k]))}</span></div>
             ))}
             <Separator className="my-1" />
             <div className="flex items-baseline justify-between">
               <span className="font-medium">Total</span>
-              <span className="font-mono text-2xl font-semibold">{soles(Number(total))}</span>
+              <span className="tabular-nums text-2xl font-semibold">{soles(Number(total))}</span>
             </div>
             {bloqueos.length > 0 && cuerpoItems.length > 0 && (
               <Alert variant="destructive" className="mt-2">
@@ -483,7 +483,7 @@ export function ClienteCombobox({ value, onChange, placeholder }: { value: Clien
               {res.data?.map((c) => (
                 <CommandItem key={c.id} value={String(c.id)} onSelect={() => { onChange(c); setOpen(false) }}>
                   <CheckIcon className={cn(value?.id === c.id ? "opacity-100" : "opacity-0")} />
-                  <span className="font-mono text-xs">{c.numero_documento}</span>
+                  <span className="tabular-nums text-xs">{c.numero_documento}</span>
                   <span className="truncate">{c.razon_social}</span>
                 </CommandItem>
               ))}
@@ -521,9 +521,9 @@ export function ProductoCombobox({ onSelect }: { onSelect: (p: ProductoDto) => v
                 <CommandItem key={p.id} value={String(p.id)} onSelect={() => { onSelect(p); setOpen(false); setQ("") }}>
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate">{p.descripcion}</span>
-                    <span className="font-mono text-xs text-muted-foreground">{p.codigo} · afect. {p.tip_afe_igv}</span>
+                    <span className="tabular-nums text-xs text-muted-foreground">{p.codigo} · afect. {p.tip_afe_igv}</span>
                   </div>
-                  <span className="font-mono text-sm">{soles(p.precio_venta)}</span>
+                  <span className="tabular-nums text-sm">{soles(p.precio_venta)}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

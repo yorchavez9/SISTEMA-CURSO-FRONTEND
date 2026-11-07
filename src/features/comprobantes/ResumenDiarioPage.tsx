@@ -132,14 +132,14 @@ export function ResumenDiarioPage() {
                       <div className="capitalize">{fechaLarga(f.fecha)}</div>
                       <div className="text-xs text-muted-foreground">{f.es_hoy ? "Hoy" : f.dias === 1 ? "Hace 1 día" : `Hace ${f.dias} días`}</div>
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right tabular-nums">
                       {f.registradas}
                       {f.sin_registrar > 0 && <div className="text-xs text-muted-foreground">+{f.sin_registrar} sin registrar</div>}
                     </TableCell>
-                    <TableCell className="text-right font-mono">{soles(f.total)}</TableCell>
+                    <TableCell className="text-right tabular-nums">{soles(f.total)}</TableCell>
                     <TableCell>
                       {f.resumen_activo ? (
-                        <div className="flex flex-col items-start gap-1"><EstadoBaja estado={f.resumen_activo.estado} /><span className="font-mono text-xs text-muted-foreground">{f.resumen_activo.identifier ?? "Creando…"}</span></div>
+                        <div className="flex flex-col items-start gap-1"><EstadoBaja estado={f.resumen_activo.estado} /><span className="tabular-nums text-xs text-muted-foreground">{f.resumen_activo.identifier ?? "Creando…"}</span></div>
                       ) : f.es_hoy ? <Badge variant="outline">Se envía desde mañana</Badge>
                         : f.sin_registrar > 0 ? <Badge variant="outline">Esperando registro en la API</Badge>
                         : <Badge variant="secondary">Lista para enviar</Badge>}
@@ -173,10 +173,10 @@ export function ResumenDiarioPage() {
               <TableBody>
                 {historial.data?.data.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell><div className="font-mono">{r.identifier ?? "—"}</div><div className="text-xs text-muted-foreground">{r.usuario}</div></TableCell>
+                    <TableCell><div className="tabular-nums">{r.identifier ?? "—"}</div><div className="text-xs text-muted-foreground">{r.usuario}</div></TableCell>
                     <TableCell>{r.fecha_documentos}</TableCell>
                     <TableCell className="max-w-72">
-                      <div className="truncate font-mono text-sm">{r.comprobantes.map((c) => c.numero).join(", ") || "—"}</div>
+                      <div className="truncate tabular-nums text-sm">{r.comprobantes.map((c) => c.numero).join(", ") || "—"}</div>
                       {r.documentos_externos > 0 && <div className="text-xs text-muted-foreground">+{r.documentos_externos} de otro sistema con la misma cuenta</div>}
                     </TableCell>
                     <TableCell>

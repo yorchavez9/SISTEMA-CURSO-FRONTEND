@@ -268,7 +268,7 @@ function CredencialCard({ empresaId, estado, enUso }: { empresaId: number; estad
           <div className="flex flex-col gap-3">
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
               <dt className="text-muted-foreground">API Key</dt>
-              <dd className="font-mono">{estado.api_key_mascara}</dd>
+              <dd className="tabular-nums">{estado.api_key_mascara}</dd>
               <dt className="text-muted-foreground">Verificado</dt>
               <dd>{fecha(estado.verificado_at)}</dd>
               {r && (

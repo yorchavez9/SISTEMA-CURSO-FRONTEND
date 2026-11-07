@@ -41,10 +41,10 @@ export function PagosEditor({ pagos, onChange, metodos, objetivo, exacto }: {
               <SelectTrigger aria-label="Método de pago"><SelectValue /></SelectTrigger>
               <SelectContent>{metodos.map((m) => <SelectItem key={m.metodo} value={m.metodo}>{m.label}</SelectItem>)}</SelectContent>
             </Select>
-            <Input inputMode="decimal" className="font-mono" aria-label="Monto" placeholder="Monto" value={p.monto} onChange={(e) => set(i, { monto: e.target.value })} />
+            <Input inputMode="decimal" className="tabular-nums" aria-label="Monto" placeholder="Monto" value={p.monto} onChange={(e) => set(i, { monto: e.target.value })} />
             {p.metodo === "efectivo" ? (
               <div>
-                <Input inputMode="decimal" className="font-mono" aria-label="Efectivo recibido" placeholder="Recibido" value={p.recibido} onChange={(e) => set(i, { recibido: e.target.value })} />
+                <Input inputMode="decimal" className="tabular-nums" aria-label="Efectivo recibido" placeholder="Recibido" value={p.recibido} onChange={(e) => set(i, { recibido: e.target.value })} />
                 {vuelto > 0 && <p className="mt-1 text-xs font-medium">Vuelto: {soles(vuelto)}</p>}
               </div>
             ) : (
@@ -58,7 +58,7 @@ export function PagosEditor({ pagos, onChange, metodos, objetivo, exacto }: {
         <Button type="button" variant="outline" size="sm" onClick={() => onChange([...pagos, { metodo: "yape", monto: dif > 0 ? dif.toFixed(2) : "", recibido: "", referencia: "" }])}>
           <PlusIcon /> Otro método
         </Button>
-        <span className={cn("font-mono text-sm", (exacto ? dif !== 0 : dif < 0) && "text-destructive")}>
+        <span className={cn("tabular-nums text-sm", (exacto ? dif !== 0 : dif < 0) && "text-destructive")}>
           {soles(suma)} / {soles(objetivo)}
         </span>
       </div>

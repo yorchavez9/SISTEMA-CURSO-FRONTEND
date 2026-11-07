@@ -114,19 +114,19 @@ export function ReportesPage() {
                     {ventas.data?.filas.map((f) => (
                       <TableRow key={f.clave + f.etiqueta}>
                         <TableCell className="max-w-80 truncate">{etiquetaFila(f)}</TableCell>
-                        <TableCell className="text-right font-mono">{f.cantidad.toLocaleString("es-PE")}</TableCell>
-                        <TableCell className="text-right font-mono">{soles(f.base)}</TableCell>
-                        <TableCell className="text-right font-mono">{soles(f.igv)}</TableCell>
-                        <TableCell className={cn("text-right font-mono font-medium", f.total < 0 && "text-destructive")}>{soles(f.total)}</TableCell>
+                        <TableCell className="text-right tabular-nums">{f.cantidad.toLocaleString("es-PE")}</TableCell>
+                        <TableCell className="text-right tabular-nums">{soles(f.base)}</TableCell>
+                        <TableCell className="text-right tabular-nums">{soles(f.igv)}</TableCell>
+                        <TableCell className={cn("text-right tabular-nums font-medium", f.total < 0 && "text-destructive")}>{soles(f.total)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                   <TableFooter>
                     <TableRow>
                       <TableCell colSpan={2}>Total</TableCell>
-                      <TableCell className="text-right font-mono">{soles(ventas.data?.totales.base ?? 0)}</TableCell>
-                      <TableCell className="text-right font-mono">{soles(ventas.data?.totales.igv ?? 0)}</TableCell>
-                      <TableCell className="text-right font-mono">{soles(ventas.data?.totales.total ?? 0)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{soles(ventas.data?.totales.base ?? 0)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{soles(ventas.data?.totales.igv ?? 0)}</TableCell>
+                      <TableCell className="text-right tabular-nums">{soles(ventas.data?.totales.total ?? 0)}</TableCell>
                     </TableRow>
                   </TableFooter>
                 </Table>
@@ -140,7 +140,7 @@ export function ReportesPage() {
             <>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 {([["gravadas", "Op. gravadas"], ["exoneradas", "Op. exoneradas"], ["inafectas", "Op. inafectas"], ["igv", "IGV"], ["total", "Importe total"]] as const).map(([k, l]) => (
-                  <Card key={k}><CardHeader><CardDescription>{l}</CardDescription><CardTitle className="font-mono text-xl">{soles(registro.data.totales[k] ?? 0)}</CardTitle></CardHeader></Card>
+                  <Card key={k}><CardHeader><CardDescription>{l}</CardDescription><CardTitle className="tabular-nums text-xl">{soles(registro.data.totales[k] ?? 0)}</CardTitle></CardHeader></Card>
                 ))}
               </div>
               <Card>
@@ -174,12 +174,12 @@ export function ReportesPage() {
                       {registro.data.filas.map((f) => (
                         <TableRow key={f.tipo + f.numero} className={f.total === 0 && f.estado !== "aceptado" ? "opacity-60" : undefined}>
                           <TableCell className="whitespace-nowrap">{f.fecha}</TableCell>
-                          <TableCell><div className="font-mono">{f.numero}</div><div className="text-xs text-muted-foreground">{TIPO[f.tipo]}{f.referencia && ` de ${f.referencia}`}{!["aceptado", "enviado", "por_enviar", "observado"].includes(f.estado) && ` · ${f.estado}`}</div></TableCell>
-                          <TableCell className="max-w-64"><div className="truncate">{f.cliente}</div><div className="font-mono text-xs text-muted-foreground">{f.cliente_doc}</div></TableCell>
-                          <TableCell className="text-right font-mono">{soles(f.gravadas)}</TableCell>
-                          <TableCell className="text-right font-mono">{soles(f.exoneradas + f.inafectas)}</TableCell>
-                          <TableCell className="text-right font-mono">{soles(f.igv)}</TableCell>
-                          <TableCell className={cn("text-right font-mono font-medium", f.total < 0 && "text-destructive")}>{soles(f.total)}</TableCell>
+                          <TableCell><div className="tabular-nums">{f.numero}</div><div className="text-xs text-muted-foreground">{TIPO[f.tipo]}{f.referencia && ` de ${f.referencia}`}{!["aceptado", "enviado", "por_enviar", "observado"].includes(f.estado) && ` · ${f.estado}`}</div></TableCell>
+                          <TableCell className="max-w-64"><div className="truncate">{f.cliente}</div><div className="tabular-nums text-xs text-muted-foreground">{f.cliente_doc}</div></TableCell>
+                          <TableCell className="text-right tabular-nums">{soles(f.gravadas)}</TableCell>
+                          <TableCell className="text-right tabular-nums">{soles(f.exoneradas + f.inafectas)}</TableCell>
+                          <TableCell className="text-right tabular-nums">{soles(f.igv)}</TableCell>
+                          <TableCell className={cn("text-right tabular-nums font-medium", f.total < 0 && "text-destructive")}>{soles(f.total)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
