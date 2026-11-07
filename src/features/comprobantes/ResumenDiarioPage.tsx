@@ -107,7 +107,7 @@ export function ResumenDiarioPage() {
       <Card>
         <CardHeader>
           <CardTitle>Boletas pendientes de resumen</CardTitle>
-          <CardDescription>Solo se resumen fechas anteriores a hoy: SUNAT admite un único resumen de envío por fecha.</CardDescription>
+          <CardDescription>El envío automático resume cada día a partir del siguiente (00:15). También puedes enviar manualmente cualquier fecha, incluida la de hoy.</CardDescription>
         </CardHeader>
         <CardContent>
           {pendientes.isLoading ? <Skeleton className="h-24" /> : pendientes.isError ? (
@@ -140,13 +140,13 @@ export function ResumenDiarioPage() {
                     <TableCell>
                       {f.resumen_activo ? (
                         <div className="flex flex-col items-start gap-1"><EstadoBaja estado={f.resumen_activo.estado} /><span className="tabular-nums text-xs text-muted-foreground">{f.resumen_activo.identifier ?? "Creando…"}</span></div>
-                      ) : f.es_hoy ? <Badge variant="outline">Se envía desde mañana</Badge>
-                        : f.sin_registrar > 0 ? <Badge variant="outline">Esperando registro en la API</Badge>
+                      ) : f.sin_registrar > 0 ? <Badge variant="outline">Esperando registro en la API</Badge>
+                        : f.es_hoy ? <Badge variant="outline">Automático desde mañana</Badge>
                         : <Badge variant="secondary">Lista para enviar</Badge>}
                     </TableCell>
                     <TableCell className="text-right">
-                      {puede("comprobantes.emitir") && !f.es_hoy && !f.resumen_activo && (
-                        <Button size="sm" disabled={f.sin_registrar > 0 || f.registradas === 0 || enviar.isPending} onClick={() => setConfirmar(f)}><SendIcon /> Enviar resumen</Button>
+                      {puede("comprobantes.emitir") && !f.resumen_activo && (
+                        <Button size="sm" variant={f.es_hoy ? "outline" : "default"} disabled={f.sin_registrar > 0 || f.registradas === 0 || enviar.isPending} onClick={() => setConfirmar(f)}><SendIcon /> {f.es_hoy ? "Enviar ahora" : "Enviar resumen"}</Button>
                       )}
                     </TableCell>
                   </TableRow>
@@ -202,9 +202,16 @@ export function ResumenDiarioPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Enviar el resumen del {confirmar && fechaLarga(confirmar.fecha)}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se informarán a SUNAT {confirmar?.registradas} boleta(s) por {confirmar && soles(confirmar.total)}. Solo se admite un resumen de envío por fecha.
+              Se informarán a SUNAT {confirmar?.registradas} boleta(s) por {confirmar && soles(confirmar.total)}.
               La API incluye todas las boletas pendientes de esa fecha en la cuenta, también las emitidas por otro sistema que use las mismas credenciales.
             </AlertDialogDescription>
+            {confirmar?.es_hoy && (
+              <Alert>
+                <InfoIcon />
+                <AlertTitle>Resumen del día en curso</AlertTitle>
+                <AlertDescription>Las boletas por resumen que emitas más tarde hoy no irán en este envío: quedarán pendientes para un nuevo resumen, una vez que SUNAT responda a este.</AlertDescription>
+              </Alert>
+            )}
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
