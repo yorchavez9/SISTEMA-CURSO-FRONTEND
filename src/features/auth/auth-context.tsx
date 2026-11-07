@@ -82,8 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.post("/auth/logout")
     } finally {
-      qc.clear()
+      // Primero se marca "sin usuario" sobre la consulta observada (qc.clear() la eliminaría y el
+      // componente seguiría viendo el usuario anterior); luego se descarta el resto de datos cacheados.
+      await qc.cancelQueries()
       qc.setQueryData(["auth", "me"], null)
+      qc.removeQueries({ predicate: (q) => q.queryKey[0] !== "auth" })
     }
   }, [qc])
 

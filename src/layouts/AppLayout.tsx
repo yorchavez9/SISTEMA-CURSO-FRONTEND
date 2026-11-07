@@ -200,7 +200,7 @@ function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="min-w-56" side="top" align="start">
-                <DropdownMenuItem onSelect={async () => { await logout(); navigate("/login") }}>
+                <DropdownMenuItem onSelect={() => { logout().catch(() => undefined).finally(() => navigate("/login", { replace: true })) }}>
                   <LogOutIcon /> Cerrar sesión
                 </DropdownMenuItem>
               </DropdownMenuContent>
