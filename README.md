@@ -25,7 +25,7 @@ El puerto 5174 es fijo (`strictPort`). Si lo cambias, actualiza `FRONTEND_URL` y
 | `npm run dev` | Servidor de desarrollo |
 | `npx tsc -b` | Verificación de tipos |
 | `npm run lint` | Lint (oxlint) |
-| `npm run build` | Compilación de producción en `dist/` |
+| `npm run build` | Compilación de producción en `dist/` (usa `.env.production`) |
 
 ## Estructura
 
@@ -38,4 +38,15 @@ src/
   lib/                   Cliente HTTP (axios + XSRF + empresa activa), descargas y tipos
 ```
 
-En producción se sirve `dist/` desde el mismo dominio que la API (ver `docs/despliegue.md` en el backend).
+## Producción
+
+`npm run build` genera `dist/` (archivos estáticos). La dirección del backend se fija **al compilar** con `VITE_API_URL`, que se toma de `.env.production`:
+
+```dotenv
+VITE_API_URL=https://cursoapi.kodevo.es   # cámbiala por la de tu backend (sin "/" final)
+```
+
+`public/.htaccess` se incluye en `dist/` para que las rutas del SPA (`/login`, `/comprobantes`…) no den 404 en Apache/LiteSpeed.
+
+Guía paso a paso (Hostinger, otro hosting o VPS) y solución de problemas: **[docs/despliegue.md](docs/despliegue.md)**.
+Configuración del backend para producción: [docs/despliegue-hostinger.md](https://github.com/yorchavez9/SISTEMAS-CURSO-BACKEND/blob/main/docs/despliegue-hostinger.md).
