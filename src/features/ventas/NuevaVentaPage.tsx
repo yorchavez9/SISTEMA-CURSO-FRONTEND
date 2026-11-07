@@ -82,6 +82,9 @@ export function NuevaVentaPage() {
   const [lineas, setLineas] = useState<Linea[]>([])
   const [descuentoGlobal, setDescuentoGlobal] = useState("")
   const [formaPago, setFormaPago] = useState<"contado" | "credito">("contado")
+  // Envío de la boleta: null = el modo por defecto configurado en la empresa (Resumen diario).
+  const [envioElegido, setEnvioElegido] = useState<"individual" | "resumen" | null>(null)
+  const envioBoleta = envioElegido ?? empresa?.envio_boletas ?? "individual"
   const [cuotas, setCuotas] = useState<Cuota[]>([])
   const [observacion, setObservacion] = useState("")
   const [pagos, setPagos] = useState<PagoForm[] | null>(null) // null = un pago en efectivo por el total
@@ -163,6 +166,7 @@ export function NuevaVentaPage() {
       (await api.post<{ data: { comprobante: { id: number; numero: string } }; message: string }>("/ventas", {
         idempotency_key: idempotency.current,
         tipo_documento: tipo,
+        envio_boleta: tipo === "03" ? envioBoleta : undefined,
         serie_id: Number(serieId),
         cliente_id: cliente?.id ?? null,
         cotizacion_id: desdeCotizacion.data?.c.convertible ? desdeCotizacion.data.c.id : undefined,
@@ -282,6 +286,22 @@ export function NuevaVentaPage() {
                     {!cliente && tipo === "03" && <FieldDescription>Sin cliente se emite a “CONSUMIDOR FINAL” (solo menos de S/ 700).</FieldDescription>}
                   </Field>
                 </div>
+                {tipo === "03" && (
+                  <Field>
+                    <FieldLabel>Envío a SUNAT</FieldLabel>
+                    <Tabs value={envioBoleta} onValueChange={(v) => setEnvioElegido(v as "individual" | "resumen")}>
+                      <TabsList>
+                        <TabsTrigger value="individual">Individual</TabsTrigger>
+                        <TabsTrigger value="resumen">Resumen diario</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                    <FieldDescription>
+                      {envioBoleta === "individual"
+                        ? "La boleta se envía a SUNAT al emitirse y queda aceptada en segundos."
+                        : "La boleta se registra ahora y se informa a SUNAT en el resumen diario del día siguiente (envío automático a las 00:15)."}
+                    </FieldDescription>
+                  </Field>
+                )}
               </FieldGroup>
             </CardContent>
           </Card>

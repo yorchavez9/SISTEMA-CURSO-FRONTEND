@@ -81,8 +81,8 @@ export function ResumenDiarioPage() {
           <CardContent>
             <Field orientation="horizontal" className="flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
               <FieldLabel htmlFor="modo-boletas" className="flex-col items-start">
-                Modo de envío de boletas
-                <FieldDescription>Se aplica a las boletas que se emitan desde ahora. Las facturas y las notas siempre se envían una por una.</FieldDescription>
+                Modo de envío de boletas por defecto
+                <FieldDescription>Es la opción que viene marcada en Nueva venta; puede cambiarse en cada boleta. Las facturas y las notas siempre se envían una por una.</FieldDescription>
               </FieldLabel>
               <Select value={empresa.envio_boletas} disabled={modo.isPending} onValueChange={(v) => modo.mutate(v)}>
                 <SelectTrigger id="modo-boletas" className="w-full sm:w-64"><SelectValue /></SelectTrigger>
