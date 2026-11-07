@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -195,12 +195,12 @@ export function ComprobantesPage() {
           <Paginador meta={lista.data?.meta} onPage={setPagina} />
         </CardContent>
       </Card>
-      <DetalleSheet id={verId ? Number(verId) : null} onClose={() => setParams({})} onReintentar={(id) => reintentar.mutate(id)} onVer={(id) => setParams({ ver: String(id) })} />
+      <DetalleDialog id={verId ? Number(verId) : null} onClose={() => setParams({})} onReintentar={(id) => reintentar.mutate(id)} onVer={(id) => setParams({ ver: String(id) })} />
     </div>
   )
 }
 
-function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null; onClose: () => void; onReintentar: (id: number) => void; onVer: (id: number) => void }) {
+function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null; onClose: () => void; onReintentar: (id: number) => void; onVer: (id: number) => void }) {
   const { puede } = useAuth()
   const qc = useQueryClient()
   const [nota, setNota] = useState<"07" | "08" | null>(null)
@@ -215,12 +215,12 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
   const tiene = (t: string) => c?.archivos.some((a) => a.tipo === t)
 
   return (
-    <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="tabular-nums">{c?.numero ?? "Comprobante"}</SheetTitle>
-          <SheetDescription>{c ? `${TIPO[c.tipo_documento]} · ${c.fecha_emision}` : "Cargando…"}</SheetDescription>
-        </SheetHeader>
+    <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+        <DialogHeader className="p-4 pr-12">
+          <DialogTitle className="tabular-nums">{c?.numero ?? "Comprobante"}</DialogTitle>
+          <DialogDescription>{c ? `${TIPO[c.tipo_documento]} · ${c.fecha_emision}` : "Cargando…"}</DialogDescription>
+        </DialogHeader>
         {d.isLoading && <div className="p-4"><Skeleton className="h-64" /></div>}
         {d.isError && <Alert variant="destructive" className="m-4"><AlertDescription>{toApiError(d.error).message}</AlertDescription></Alert>}
         {c && (
@@ -375,7 +375,7 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
             </section>
           </div>
         )}
-      </SheetContent>
+      </DialogContent>
       {baja && c && (
         <BajaDialog comprobante={{ id: c.id, numero: c.numero, tipo_documento: c.tipo_documento, plazo: c.plazo_baja }} onClose={() => setBaja(false)}
           onDone={() => { qc.invalidateQueries({ queryKey: ["comprobante"] }); qc.invalidateQueries({ queryKey: ["bajas"] }) }} />
@@ -384,6 +384,6 @@ function DetalleSheet({ id, onClose, onReintentar, onVer }: { id: number | null;
         <NotaDialog comprobanteId={c.id} tipo={nota} onClose={() => setNota(null)}
           onCreada={(nid) => { setNota(null); qc.invalidateQueries({ queryKey: ["comprobantes"] }); qc.invalidateQueries({ queryKey: ["comprobante"] }); onVer(nid) }} />
       )}
-    </Sheet>
+    </Dialog>
   )
 }
