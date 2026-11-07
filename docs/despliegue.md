@@ -105,5 +105,6 @@ En el navegador: la primera vez debe aparecer **Configuración inicial** (regist
 | "No se pudo conectar con el servidor (https://*frontend*/api/v1)" | Compilado sin `VITE_API_URL` | Revisa `.env.production` y vuelve a compilar / redistribuir |
 | "No se pudo conectar…" con la dirección correcta del backend | Backend caído o CORS mal configurado | Abre `https://<backend>/api/v1/setup/estado`; revisa `FRONTEND_URL` en el backend |
 | Error 419 al registrar o iniciar sesión | `SESSION_DOMAIN` del backend | `SESSION_DOMAIN=.midominio.pe` + `php artisan config:cache` |
+| "CSRF token mismatch" aunque `SESSION_DOMAIN` ya es correcto | Cookies viejas del backend con el mismo nombre en el navegador | En el backend `SESSION_COOKIE=sistemacurso_session` + `php artisan config:cache`, o borrar las cookies del dominio en el navegador |
 | Tras iniciar sesión todo da 401 | `SANCTUM_STATEFUL_DOMAINS` del backend | Debe contener el dominio del frontend sin `https://` |
 | Cambios publicados pero el navegador muestra la versión anterior | Caché del navegador | Ctrl+F5 (los archivos de `assets/` cambian de nombre en cada compilación) |
