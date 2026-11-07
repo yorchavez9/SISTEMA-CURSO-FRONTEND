@@ -38,6 +38,9 @@ interface ComprobanteResumen {
   estado: Estado
   sunat_codigo: string | null
   sunat_descripcion: string | null
+  /** Estado real ante SUNAT (un comprobante anulado por NC sigue "aceptado" en SUNAT). */
+  estado_sunat: Estado
+  anulado_por: { id: number; numero: string } | null
   diferencia_totales: boolean
   ultimo_error: string | null
   imprimible: boolean
@@ -242,6 +245,19 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
               {c.forma_pago === "credito" && <Badge variant="secondary">Crédito</Badge>}
             </div>
             {c.sunat_descripcion && <p className="text-muted-foreground">{c.sunat_descripcion}</p>}
+            {c.anulado_por && (
+              <Alert>
+                <BanIcon />
+                <AlertTitle>Anulado mediante nota de crédito</AlertTitle>
+                <AlertDescription>
+                  <span>
+                    Anulado por la nota de crédito{" "}
+                    <Button variant="link" className="h-auto p-0 tabular-nums" onClick={() => onVer(c.anulado_por!.id)}>{c.anulado_por.numero}</Button>
+                    . Ante SUNAT el comprobante sigue aceptado y la nota lo compensa en el registro de ventas.
+                  </span>
+                </AlertDescription>
+              </Alert>
+            )}
             {c.ultimo_error && (
               <Alert variant="destructive">
                 <CircleAlertIcon />
