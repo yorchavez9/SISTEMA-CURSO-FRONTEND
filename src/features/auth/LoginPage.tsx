@@ -10,7 +10,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Spinner } from "@/components/ui/spinner"
-import { applyServerErrors, toApiError } from "@/lib/api"
+import { API_ORIGIN, applyServerErrors, toApiError } from "@/lib/api"
 import { useAuth } from "./auth-context"
 import { useSetupEstado } from "./setup.api"
 
@@ -31,6 +31,9 @@ export function LoginPage() {
   if (user) return <Navigate to="/" replace />
   // Primera ejecución: sin usuarios no hay a quién autenticar → registrar el superadministrador.
   if (setup.data === true) return <Navigate to="/configuracion-inicial" replace />
+  if (setup.isLoading) {
+    return <div className="flex min-h-svh items-center justify-center"><Spinner /></div>
+  }
 
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null)
@@ -64,6 +67,14 @@ export function LoginPage() {
           <CardContent>
             <form onSubmit={onSubmit} noValidate>
               <FieldGroup>
+                {setup.isError && (
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      No se pudo conectar con el servidor ({API_ORIGIN || window.location.origin}/api/v1).
+                      {!API_ORIGIN && " Si el backend está en otro dominio, define VITE_API_URL al compilar el frontend."}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 {formError && (
                   <Alert variant="destructive">
                     <AlertDescription>{formError}</AlertDescription>
