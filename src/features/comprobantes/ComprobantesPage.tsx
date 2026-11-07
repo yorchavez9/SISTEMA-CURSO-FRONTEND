@@ -200,6 +200,9 @@ export function ComprobantesPage() {
   )
 }
 
+/** Estados en los que SUNAT ya respondió y existen XML, CDR y PDF para descargar. */
+const conArchivos = (estado: string) => ["aceptado", "observado", "anulado"].includes(estado)
+
 function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null; onClose: () => void; onReintentar: (id: number) => void; onVer: (id: number) => void }) {
   const { puede } = useAuth()
   const qc = useQueryClient()
@@ -209,10 +212,18 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
     queryKey: ["comprobante", id],
     enabled: id !== null,
     queryFn: async () => (await api.get<{ data: ComprobanteDetalle }>(`/comprobantes/${id}`)).data.data,
-    refetchInterval: (q) => (q.state.data && PENDIENTES.includes(q.state.data.estado) ? 3000 : false),
+    // Se sigue consultando mientras SUNAT no responde y, ya aceptado, hasta que lleguen XML/CDR/PDF
+    // (se descargan unos segundos después de la aceptación; tope de ~2 minutos).
+    refetchInterval: (q) => {
+      const x = q.state.data
+      if (!x) return false
+      if (PENDIENTES.includes(x.estado)) return 3000
+      return conArchivos(x.estado) && x.archivos.length < 3 && q.state.dataUpdateCount < 40 ? 3000 : false
+    },
   })
   const c = d.data
   const tiene = (t: string) => c?.archivos.some((a) => a.tipo === t)
+  const preparando = (t: string) => !!c && conArchivos(c.estado) && !tiene(t)
 
   return (
     <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
@@ -243,8 +254,9 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
             )}
             <div className="flex flex-wrap gap-2">
               {puede("comprobantes.descargar") && (["pdf", "xml", "cdr"] as const).map((t) => (
-                <Button key={t} variant="outline" size="sm" disabled={!tiene(t)} onClick={() => descargar(c.id, t, c.numero)}>
-                  <DownloadIcon /> {t.toUpperCase()}
+                <Button key={t} variant="outline" size="sm" disabled={!tiene(t)} onClick={() => descargar(c.id, t, c.numero)}
+                  title={preparando(t) ? "Descargando desde SUNAT…" : undefined}>
+                  {preparando(t) ? <Spinner data-icon="inline-start" /> : <DownloadIcon />} {t.toUpperCase()}
                 </Button>
               ))}
               {puede("comprobantes.descargar") && c.imprimible && <ImprimirBoton comprobanteId={c.id} numero={c.numero} />}
