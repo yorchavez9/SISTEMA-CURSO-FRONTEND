@@ -50,7 +50,7 @@ export function PagosEditor({ pagos, onChange, metodos, objetivo, exacto }: {
             ) : (
               <Input aria-label="Referencia de la operación" placeholder="N.º operación" value={p.referencia} onChange={(e) => set(i, { referencia: e.target.value })} />
             )}
-            <Button type="button" variant="ghost" size="icon" aria-label="Quitar pago" disabled={pagos.length === 1} onClick={() => onChange(pagos.filter((_, j) => j !== i))}><XIcon /></Button>
+            <Button type="button" variant="destructive" size="icon" aria-label="Quitar pago" disabled={pagos.length === 1} onClick={() => onChange(pagos.filter((_, j) => j !== i))}><XIcon /></Button>
           </div>
         )
       })}

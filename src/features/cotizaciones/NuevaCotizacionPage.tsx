@@ -157,7 +157,7 @@ export function NuevaCotizacionPage() {
                           </Select>
                         </TableCell>
                         <TableCell><Input aria-label="Descuento" type="number" min="0" step="0.01" className="text-right tabular-nums" value={l.descuento} onChange={(e) => cambiar(l.key, { descuento: e.target.value })} /></TableCell>
-                        <TableCell><Button type="button" variant="ghost" size="icon" aria-label="Quitar ítem" onClick={() => setLineas((ls) => ls.filter((x) => x.key !== l.key))}><Trash2Icon /></Button></TableCell>
+                        <TableCell><Button type="button" variant="destructive" size="icon" aria-label="Quitar ítem" onClick={() => setLineas((ls) => ls.filter((x) => x.key !== l.key))}><Trash2Icon /></Button></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

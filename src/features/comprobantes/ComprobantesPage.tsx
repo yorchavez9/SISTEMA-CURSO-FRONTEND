@@ -179,11 +179,11 @@ export function ComprobantesPage() {
                     </TableCell>
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-end gap-1">
-                        {puede("comprobantes.descargar") && c.archivos?.includes("pdf") && <Button variant="ghost" size="icon" aria-label={`PDF de ${c.numero}`} onClick={() => descargar(c.id, "pdf", c.numero)}><FileTextIcon /></Button>}
-                        {puede("comprobantes.descargar") && c.archivos?.includes("xml") && <Button variant="ghost" size="icon" aria-label={`XML de ${c.numero}`} onClick={() => descargar(c.id, "xml", c.numero)}><FileCodeIcon /></Button>}
-                        {puede("comprobantes.descargar") && c.archivos?.includes("cdr") && <Button variant="ghost" size="icon" aria-label={`CDR de ${c.numero}`} onClick={() => descargar(c.id, "cdr", c.numero)}><FileArchiveIcon /></Button>}
+                        {puede("comprobantes.descargar") && c.archivos?.includes("pdf") && <Button variant="info" size="icon" aria-label={`PDF de ${c.numero}`} onClick={() => descargar(c.id, "pdf", c.numero)}><FileTextIcon /></Button>}
+                        {puede("comprobantes.descargar") && c.archivos?.includes("xml") && <Button variant="info" size="icon" aria-label={`XML de ${c.numero}`} onClick={() => descargar(c.id, "xml", c.numero)}><FileCodeIcon /></Button>}
+                        {puede("comprobantes.descargar") && c.archivos?.includes("cdr") && <Button variant="info" size="icon" aria-label={`CDR de ${c.numero}`} onClick={() => descargar(c.id, "cdr", c.numero)}><FileArchiveIcon /></Button>}
                         {puede("comprobantes.emitir") && (c.estado === "error" || c.estado === "enviado") && (
-                          <Button variant="ghost" size="icon" aria-label={`Reintentar ${c.numero}`} disabled={reintentar.isPending} onClick={() => reintentar.mutate(c.id)}><RotateCwIcon /></Button>
+                          <Button variant="warning" size="icon" aria-label={`Reintentar ${c.numero}`} disabled={reintentar.isPending} onClick={() => reintentar.mutate(c.id)}><RotateCwIcon /></Button>
                         )}
                       </div>
                     </TableCell>

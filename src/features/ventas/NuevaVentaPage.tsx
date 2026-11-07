@@ -275,7 +275,7 @@ export function NuevaVentaPage() {
                     <div className="flex gap-2">
                       <ClienteCombobox value={cliente} onChange={setCliente} placeholder={tipo === "03" ? "Consumidor final (opcional)" : "Buscar cliente con RUC…"} />
                       {puede("clientes.crear") && (
-                        <Button type="button" variant="outline" size="icon" aria-label="Registrar cliente" onClick={() => setNuevoCliente(true)}><UserPlusIcon /></Button>
+                        <Button type="button" variant="success" size="icon" aria-label="Registrar cliente" onClick={() => setNuevoCliente(true)}><UserPlusIcon /></Button>
                       )}
                     </div>
                     {cliente && <FieldDescription className="truncate">{cliente.tipo_documento === "6" ? "RUC" : "Doc."} {cliente.numero_documento}{cliente.direccion ? ` · ${cliente.direccion}` : ""}</FieldDescription>}
@@ -345,7 +345,7 @@ export function NuevaVentaPage() {
                           <TableCell className="text-right tabular-nums">
                             {calc ? (calc.gratuito ? <Badge variant="secondary">Gratuito</Badge> : soles(Number(calc.total))) : "—"}
                           </TableCell>
-                          <TableCell><Button variant="ghost" size="icon" aria-label="Quitar ítem" onClick={() => quitar(l.key)}><Trash2Icon /></Button></TableCell>
+                          <TableCell><Button variant="destructive" size="icon" aria-label="Quitar ítem" onClick={() => quitar(l.key)}><Trash2Icon /></Button></TableCell>
                         </TableRow>
                       )
                     })}
@@ -403,7 +403,7 @@ export function NuevaVentaPage() {
                         <span className="w-6 text-sm text-muted-foreground">{i + 1}</span>
                         <Input inputMode="decimal" className="tabular-nums" aria-label={`Monto cuota ${i + 1}`} value={c.monto} onChange={(e) => setCuotas((cs) => cs.map((x, j) => (j === i ? { ...x, monto: e.target.value } : x)))} />
                         <Input type="date" aria-label={`Vencimiento cuota ${i + 1}`} value={c.fecha} onChange={(e) => setCuotas((cs) => cs.map((x, j) => (j === i ? { ...x, fecha: e.target.value } : x)))} />
-                        <Button type="button" variant="ghost" size="icon" aria-label="Quitar cuota" onClick={() => setCuotas((cs) => cs.filter((_, j) => j !== i))}><XIcon /></Button>
+                        <Button type="button" variant="destructive" size="icon" aria-label="Quitar cuota" onClick={() => setCuotas((cs) => cs.filter((_, j) => j !== i))}><XIcon /></Button>
                       </div>
                     ))}
                   </div>

@@ -17,6 +17,10 @@ const buttonVariants = cva(
           "hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:hover:bg-muted/50",
         destructive:
           "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:border-destructive/40 focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:hover:bg-destructive/30 dark:focus-visible:ring-destructive/40",
+        // Acciones con color (tablas e iconos): fondo tenue + icono en su color, en claro y oscuro.
+        info: "bg-sky-500/10 text-sky-700 hover:bg-sky-500/20 dark:bg-sky-400/15 dark:text-sky-300 dark:hover:bg-sky-400/25",
+        success: "bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 dark:bg-emerald-400/15 dark:text-emerald-300 dark:hover:bg-emerald-400/25",
+        warning: "bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 dark:bg-amber-400/15 dark:text-amber-300 dark:hover:bg-amber-400/25",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

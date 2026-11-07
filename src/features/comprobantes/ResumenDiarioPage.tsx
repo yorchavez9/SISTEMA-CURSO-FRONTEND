@@ -185,7 +185,7 @@ export function ResumenDiarioPage() {
                     </TableCell>
                     <TableCell>
                       {puede("comprobantes.emitir") && (r.estado === "enviado" || (r.estado === "por_enviar" && r.identifier)) && (
-                        <Button variant="ghost" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(r.id)}><RotateCwIcon /></Button>
+                        <Button variant="warning" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(r.id)}><RotateCwIcon /></Button>
                       )}
                     </TableCell>
                   </TableRow>

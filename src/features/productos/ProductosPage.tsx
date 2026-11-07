@@ -153,7 +153,7 @@ export function ProductosPage() {
                       {(puede("productos.editar") || puede("productos.eliminar")) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={`Acciones para ${p.descripcion}`}><MoreHorizontalIcon /></Button>
+                            <Button variant="info" size="icon" aria-label={`Acciones para ${p.descripcion}`}><MoreHorizontalIcon /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {puede("productos.editar") && <DropdownMenuItem onSelect={() => setEditando(p)}><PencilIcon /> Editar</DropdownMenuItem>}
@@ -360,7 +360,7 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                       </Select>
                     )} />
                     <Popover>
-                      <PopoverTrigger asChild><Button type="button" variant="outline" size="icon" aria-label="Nueva categoría"><PlusIcon /></Button></PopoverTrigger>
+                      <PopoverTrigger asChild><Button type="button" variant="success" size="icon" aria-label="Nueva categoría"><PlusIcon /></Button></PopoverTrigger>
                       <PopoverContent className="flex w-72 gap-2" align="end">
                         <Input placeholder="Nueva categoría" value={nuevaCat} onChange={(e) => setNuevaCat(e.target.value)} onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), crearCategoria())} />
                         <Button type="button" onClick={crearCategoria}>Crear</Button>
@@ -458,7 +458,7 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                     )} />
                     <Input inputMode="decimal" placeholder="Factor" aria-label="Unidades por presentación" {...form.register(`presentaciones.${i}.factor`)} />
                     <Input inputMode="decimal" placeholder="Precio" aria-label="Precio de la presentación" {...form.register(`presentaciones.${i}.precio_venta`)} />
-                    <Button type="button" variant="ghost" size="icon" aria-label="Quitar presentación" onClick={() => pres.remove(i)}><Trash2Icon /></Button>
+                    <Button type="button" variant="destructive" size="icon" aria-label="Quitar presentación" onClick={() => pres.remove(i)}><Trash2Icon /></Button>
                   </div>
                 ))}
                 <Button type="button" variant="outline" className="self-start" onClick={() => pres.append({ nombre: "", unidad: "BX", factor: "", precio_venta: "" })}>

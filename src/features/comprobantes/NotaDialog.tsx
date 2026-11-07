@@ -165,7 +165,7 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
                       onChange={(e) => setMontos((ms) => ms.map((y, j) => (j === i ? { ...y, descripcion: e.target.value } : y)))} />
                     <Input inputMode="decimal" className="tabular-nums" placeholder="Importe" aria-label="Importe con impuestos" value={x.importe}
                       onChange={(e) => setMontos((ms) => ms.map((y, j) => (j === i ? { ...y, importe: e.target.value } : y)))} />
-                    <Button variant="ghost" size="icon" aria-label="Quitar concepto" disabled={montos.length === 1} onClick={() => setMontos((ms) => ms.filter((_, j) => j !== i))}><Trash2Icon /></Button>
+                    <Button variant="destructive" size="icon" aria-label="Quitar concepto" disabled={montos.length === 1} onClick={() => setMontos((ms) => ms.filter((_, j) => j !== i))}><Trash2Icon /></Button>
                   </div>
                 ))}
                 <Button variant="outline" size="sm" className="self-start" onClick={() => setMontos((ms) => [...ms, { descripcion: "", importe: "" }])}><PlusIcon /> Concepto</Button>

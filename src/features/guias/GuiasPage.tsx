@@ -137,7 +137,7 @@ export function GuiasPage() {
                     <TableCell><EstadoGuiaBadge estado={g.estado} /></TableCell>
                     <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                       {g.estado === "aceptado" && (["pdf", "xml", "cdr"] as const).map((t) => (
-                        <Button key={t} variant="ghost" size="icon" aria-label={`${t.toUpperCase()} de ${g.numero}`} onClick={() => descargar(g, t)}>
+                        <Button key={t} variant="info" size="icon" aria-label={`${t.toUpperCase()} de ${g.numero}`} onClick={() => descargar(g, t)}>
                           {t === "pdf" ? <FileTextIcon /> : t === "xml" ? <FileCodeIcon /> : <FileArchiveIcon />}
                         </Button>
                       ))}

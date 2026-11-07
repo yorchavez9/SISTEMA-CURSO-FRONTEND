@@ -147,7 +147,7 @@ export function InventarioPage() {
                     <TableCell className="text-right tabular-nums text-muted-foreground">{num(f.stock_minimo)}</TableCell>
                     <TableCell className="text-right tabular-nums">{soles(f.costo_promedio)}</TableCell>
                     <TableCell className="text-right tabular-nums">{soles(f.valor)}</TableCell>
-                    <TableCell><Button variant="ghost" size="icon" aria-label={`Kardex de ${f.descripcion}`} onClick={() => setKardexId(f.producto_id)}><HistoryIcon /></Button></TableCell>
+                    <TableCell><Button variant="info" size="icon" aria-label={`Kardex de ${f.descripcion}`} onClick={() => setKardexId(f.producto_id)}><HistoryIcon /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -253,7 +253,7 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
                     <TableCell>{l.producto.descripcion}<div className="tabular-nums text-xs text-muted-foreground">{l.producto.codigo}</div></TableCell>
                     <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Cantidad" value={l.cantidad} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, cantidad: e.target.value } : x)))} /></TableCell>
                     {op === "entrada" && <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Costo unitario" value={l.costo} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, costo: e.target.value } : x)))} /></TableCell>}
-                    <TableCell><Button variant="ghost" size="icon" aria-label="Quitar" onClick={() => setLineas((ls) => ls.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
+                    <TableCell><Button variant="destructive" size="icon" aria-label="Quitar" onClick={() => setLineas((ls) => ls.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
                   </TableRow>
                 ))}
               </TableBody>

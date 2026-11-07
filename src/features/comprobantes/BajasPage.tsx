@@ -106,7 +106,7 @@ export function BajasPage() {
                     </TableCell>
                     <TableCell>
                       {puede("comprobantes.anular") && (b.estado === "error" || b.estado === "enviado") && (
-                        <Button variant="ghost" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(b.id)}><RotateCwIcon /></Button>
+                        <Button variant="warning" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(b.id)}><RotateCwIcon /></Button>
                       )}
                     </TableCell>
                   </TableRow>

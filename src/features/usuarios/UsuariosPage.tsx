@@ -125,7 +125,7 @@ function AccionesUsuario({ empresaId, usuario, roles, esYo }: { empresaId: numbe
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label={`Acciones para ${usuario.name}`} disabled={actualizar.isPending || retirar.isPending}>
+          <Button variant="info" size="icon" aria-label={`Acciones para ${usuario.name}`} disabled={actualizar.isPending || retirar.isPending}>
             <MoreHorizontalIcon />
           </Button>
         </DropdownMenuTrigger>

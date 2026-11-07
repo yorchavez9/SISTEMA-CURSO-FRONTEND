@@ -137,7 +137,7 @@ export function ClientesPage() {
                       {(puede("clientes.editar") || puede("clientes.eliminar")) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={`Acciones para ${c.razon_social}`}><MoreHorizontalIcon /></Button>
+                            <Button variant="info" size="icon" aria-label={`Acciones para ${c.razon_social}`}><MoreHorizontalIcon /></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {puede("clientes.editar") && <DropdownMenuItem onSelect={() => setEditando(c)}><PencilIcon /> Editar</DropdownMenuItem>}

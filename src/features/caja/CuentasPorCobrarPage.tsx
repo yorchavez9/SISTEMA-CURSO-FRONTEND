@@ -204,7 +204,7 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
                         <TableCell className="text-right tabular-nums">{soles(p.monto)}</TableCell>
                         <TableCell className="w-10">
                           {p.estado === "registrado" && puede("caja.operar") && (
-                            <Button variant="ghost" size="icon" aria-label="Anular pago" onClick={() => setAnular(p.id)}><Undo2Icon /></Button>
+                            <Button variant="destructive" size="icon" aria-label="Anular pago" onClick={() => setAnular(p.id)}><Undo2Icon /></Button>
                           )}
                         </TableCell>
                       </TableRow>

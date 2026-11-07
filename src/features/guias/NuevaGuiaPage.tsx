@@ -327,7 +327,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                         <Input id={`cl${i}`} className="tabular-nums uppercase" placeholder="Q12345678" value={c.licencia} onChange={(e) => setConductores(conductores.map((x, j) => (j === i ? { ...x, licencia: e.target.value.trim() } : x)))} />
                         <FieldError>{err(`conductores.${i}.licencia`)}</FieldError>
                       </Field>
-                      <Button type="button" variant="ghost" size="icon" aria-label="Quitar conductor" disabled={conductores.length === 1} onClick={() => setConductores(conductores.filter((_, j) => j !== i))}><Trash2Icon /></Button>
+                      <Button type="button" variant="destructive" size="icon" aria-label="Quitar conductor" disabled={conductores.length === 1} onClick={() => setConductores(conductores.filter((_, j) => j !== i))}><Trash2Icon /></Button>
                     </div>
                   ))}
                   {err("conductores") && <p className="text-sm text-destructive">{err("conductores")}</p>}
@@ -366,7 +366,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                     </Select>
                   </TableCell>
                   <TableCell><Input aria-label="Cantidad" type="number" min="0.0001" step="any" className="text-right tabular-nums" value={it.cantidad} onChange={(e) => setItems(items.map((x, j) => (j === i ? { ...x, cantidad: Number(e.target.value) } : x)))} /></TableCell>
-                  <TableCell><Button type="button" variant="ghost" size="icon" aria-label="Quitar bien" disabled={items.length === 1} onClick={() => setItems(items.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
+                  <TableCell><Button type="button" variant="destructive" size="icon" aria-label="Quitar bien" disabled={items.length === 1} onClick={() => setItems(items.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
                 </TableRow>
               ))}
             </TableBody>
