@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link } from "react-router"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { BanIcon, RotateCwIcon } from "lucide-react"
+import { BanIcon, DownloadIcon, RotateCwIcon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,12 +17,39 @@ import { Paginador, type MetaPaginacion } from "@/components/shared/listado"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { useAuth } from "@/features/auth/auth-context"
 import { api, toApiError } from "@/lib/api"
+import { descargarArchivo } from "@/lib/descargas"
 
 export interface Baja {
   id: number; tipo: "RA" | "RC"; accion: "anulacion" | "envio"; documentos_externos: number; tipo_label: string; fecha_documentos: string; motivo: string
   estado: "por_enviar" | "enviado" | "aceptado" | "rechazado" | "error"
-  identifier: string | null; sunat_codigo: string | null; sunat_descripcion: string | null; ultimo_error: string | null; usuario: string | null; creado: string
+  identifier: string | null; ticket: string | null; tiene_archivos: boolean; sunat_codigo: string | null; sunat_descripcion: string | null; ultimo_error: string | null; usuario: string | null; creado: string
   comprobantes: { id: number; numero: string; total: number; estado: string }[]
+}
+
+/** Identificador del resumen/baja con su ticket de SUNAT. */
+export function IdentificadorComunicacion({ b, detalle }: { b: Baja; detalle: string }) {
+  return (
+    <>
+      <div className="tabular-nums">{b.identifier ?? "—"}</div>
+      {b.ticket && <div className="tabular-nums text-xs text-muted-foreground">Ticket {b.ticket}</div>}
+      <div className="text-xs text-muted-foreground">{detalle}</div>
+    </>
+  )
+}
+
+/** Descarga del XML enviado y del CDR (constancia de SUNAT) de un resumen diario o comunicación de baja. */
+export function ArchivosComunicacion({ b }: { b: Baja }) {
+  const { puede } = useAuth()
+  if (!puede("comprobantes.descargar") || !b.tiene_archivos) return null
+  const nombre = b.identifier ?? `comunicacion-${b.id}`
+  return (
+    <>
+      <Button variant="info" size="sm" onClick={() => descargarArchivo(`/bajas/${b.id}/archivos/xml`, `${nombre}.xml`)}><DownloadIcon /> XML</Button>
+      {b.estado === "aceptado" && (
+        <Button variant="info" size="sm" onClick={() => descargarArchivo(`/bajas/${b.id}/archivos/cdr`, `R-${nombre}.zip`)}><DownloadIcon /> CDR</Button>
+      )}
+    </>
+  )
 }
 
 export function EstadoBaja({ estado }: { estado: Baja["estado"] }) {
@@ -92,12 +119,12 @@ export function BajasPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow><TableHead>Comunicación</TableHead><TableHead>Comprobantes</TableHead><TableHead>Motivo</TableHead><TableHead>Estado</TableHead><TableHead className="w-12" /></TableRow>
+                <TableRow><TableHead>Comunicación</TableHead><TableHead>Comprobantes</TableHead><TableHead>Motivo</TableHead><TableHead>Estado</TableHead><TableHead className="w-48" /></TableRow>
               </TableHeader>
               <TableBody>
                 {q.data?.data.map((b) => (
                   <TableRow key={b.id}>
-                    <TableCell><div className="tabular-nums">{b.identifier ?? "—"}</div><div className="text-xs text-muted-foreground">{b.tipo_label} · {b.usuario}</div></TableCell>
+                    <TableCell><IdentificadorComunicacion b={b} detalle={`${b.tipo_label} · ${b.usuario ?? ""}`} /></TableCell>
                     <TableCell className="tabular-nums text-sm">{b.comprobantes.map((c) => c.numero).join(", ")}</TableCell>
                     <TableCell className="max-w-56 truncate text-sm">{b.motivo}</TableCell>
                     <TableCell>
@@ -105,9 +132,12 @@ export function BajasPage() {
                       {(b.sunat_descripcion || b.ultimo_error) && <div className="mt-1 max-w-72 text-xs text-muted-foreground">{b.ultimo_error ?? `${b.sunat_codigo} ${b.sunat_descripcion}`}</div>}
                     </TableCell>
                     <TableCell>
-                      {puede("comprobantes.anular") && (b.estado === "error" || b.estado === "enviado") && (
-                        <Button variant="warning" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(b.id)}><RotateCwIcon /></Button>
-                      )}
+                      <div className="flex justify-end gap-2">
+                        <ArchivosComunicacion b={b} />
+                        {puede("comprobantes.anular") && (b.estado === "error" || b.estado === "enviado") && (
+                          <Button variant="warning" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(b.id)}><RotateCwIcon /></Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -17,7 +17,7 @@ import { Paginador, soles, type MetaPaginacion } from "@/components/shared/lista
 import { PageHeader } from "@/components/shared/PageHeader"
 import { useAuth } from "@/features/auth/auth-context"
 import { api, toApiError } from "@/lib/api"
-import { EstadoBaja, type Baja } from "./BajasPage"
+import { ArchivosComunicacion, EstadoBaja, IdentificadorComunicacion, type Baja } from "./BajasPage"
 
 interface FechaPendiente {
   fecha: string; registradas: number; sin_registrar: number; total: number; dias: number; es_hoy: boolean
@@ -168,12 +168,12 @@ export function ResumenDiarioPage() {
           ) : (
             <Table>
               <TableHeader>
-                <TableRow><TableHead>Resumen</TableHead><TableHead>Fecha de boletas</TableHead><TableHead>Boletas</TableHead><TableHead>Estado</TableHead><TableHead className="w-12" /></TableRow>
+                <TableRow><TableHead>Resumen</TableHead><TableHead>Fecha de boletas</TableHead><TableHead>Boletas</TableHead><TableHead>Estado</TableHead><TableHead className="w-48" /></TableRow>
               </TableHeader>
               <TableBody>
                 {historial.data?.data.map((r) => (
                   <TableRow key={r.id}>
-                    <TableCell><div className="tabular-nums">{r.identifier ?? "—"}</div><div className="text-xs text-muted-foreground">{r.usuario}</div></TableCell>
+                    <TableCell><IdentificadorComunicacion b={r} detalle={r.usuario ?? ""} /></TableCell>
                     <TableCell>{r.fecha_documentos}</TableCell>
                     <TableCell className="max-w-72">
                       <div className="truncate tabular-nums text-sm">{r.comprobantes.map((c) => c.numero).join(", ") || "—"}</div>
@@ -184,9 +184,12 @@ export function ResumenDiarioPage() {
                       {(r.sunat_descripcion || r.ultimo_error) && <div className="mt-1 max-w-72 text-xs text-muted-foreground">{r.ultimo_error ?? `${r.sunat_codigo} ${r.sunat_descripcion}`}</div>}
                     </TableCell>
                     <TableCell>
-                      {puede("comprobantes.emitir") && (r.estado === "enviado" || (r.estado === "por_enviar" && r.identifier)) && (
-                        <Button variant="warning" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(r.id)}><RotateCwIcon /></Button>
-                      )}
+                      <div className="flex justify-end gap-2">
+                        <ArchivosComunicacion b={r} />
+                        {puede("comprobantes.emitir") && (r.estado === "enviado" || (r.estado === "por_enviar" && r.identifier)) && (
+                          <Button variant="warning" size="icon" aria-label="Reintentar" disabled={reintentar.isPending} onClick={() => reintentar.mutate(r.id)}><RotateCwIcon /></Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
