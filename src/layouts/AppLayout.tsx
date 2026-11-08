@@ -1,5 +1,5 @@
 import { matchPath, Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router"
-import { BanIcon, CalendarClockIcon, FileTextIcon, TruckIcon, BoxesIcon, ChartColumnIcon, Building2Icon, FileCheck2Icon, HandCoinsIcon, WalletIcon, ShoppingCartIcon, ChevronsUpDownIcon, HomeIcon, LogOutIcon, PackageIcon, ReceiptTextIcon, SettingsIcon, UsersRoundIcon } from "lucide-react"
+import { BanIcon, CalendarClockIcon, FileTextIcon, TruckIcon, BoxesIcon, ChartColumnIcon, Building2Icon, FileCheck2Icon, HandCoinsIcon, WalletIcon, ShoppingCartIcon, ChevronsUpDownIcon, HomeIcon, LogOutIcon, PackageIcon, ReceiptTextIcon, SettingsIcon, ShoppingBasketIcon, UsersRoundIcon } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -50,6 +50,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { to: "/cotizaciones", label: "Cotizaciones", icon: FileTextIcon, permiso: "cotizaciones.ver" },
       { to: "/guias", label: "Guías de remisión", icon: TruckIcon, permiso: "guias.ver" },
       { to: "/retenciones", label: "Retenciones y percepciones", icon: HandCoinsIcon, permiso: "retenciones.ver" },
+      { to: "/liquidaciones", label: "Liquidaciones de compra", icon: ShoppingBasketIcon, permiso: "liquidaciones.ver" },
       { to: "/resumen-diario", label: "Resumen diario", icon: CalendarClockIcon, permiso: "comprobantes.ver" },
       { to: "/bajas", label: "Bajas SUNAT", icon: BanIcon, permiso: "comprobantes.ver" },
       { to: "/caja", label: "Caja", icon: WalletIcon, permiso: "caja.ver" },

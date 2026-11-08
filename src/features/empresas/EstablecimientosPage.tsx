@@ -49,7 +49,7 @@ interface Datos {
   series_sin_establecimiento: SerieDto[]
 }
 
-const TIPOS = ["01", "03", "07", "08", "09", "31", "20", "40"]
+const TIPOS = ["01", "03", "07", "08", "09", "31", "20", "40", "04"]
 
 export function EstablecimientosPage() {
   const { empresa, puede } = useAuth()
@@ -283,7 +283,7 @@ function NuevoEstablecimiento({ onDone }: { onDone: () => void }) {
   )
 }
 
-const PREFIJO: Record<string, string> = { "01": "F001", "03": "B001", "07": "FC01", "08": "FD01", "09": "T001", "31": "V001", "20": "R001", "40": "P001" }
+const PREFIJO: Record<string, string> = { "01": "F001", "03": "B001", "07": "FC01", "08": "FD01", "09": "T001", "31": "V001", "20": "R001", "40": "P001", "04": "L001" }
 
 function NuevaSerie({ establecimiento, tipoLabel, onDone }: { establecimiento: EstablecimientoDto; tipoLabel: (c: string) => string; onDone: () => void }) {
   const [open, setOpen] = useState(false)
