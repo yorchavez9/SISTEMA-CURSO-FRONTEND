@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/shared/PageHeader"
 import { useAuth } from "@/features/auth/auth-context"
 import { api, toApiError } from "@/lib/api"
 import { descargarArchivo } from "@/lib/descargas"
+import { NuevaGuiaTransportistaDialog } from "./NuevaGuiaTransportistaDialog"
 
 type EstadoGuia = "por_enviar" | "enviado" | "aceptado" | "rechazado" | "error"
 
@@ -33,6 +34,8 @@ interface GuiaDetalle extends Guia {
   partida: { ubigeo: string; direccion: string }
   peso_total: number; und_peso_total: string; num_bultos: number | null
   transportista: { num_doc: string; razon_social: string; nro_mtc?: string } | null
+  remitente: { num_doc: string; razon_social: string } | null
+  doc_relacionado: { tipo_codigo: string; numero: string } | null
   vehiculo: { placa: string; secundarios?: { placa: string }[] } | null
   conductores: { tipo?: string; tipo_doc: string; num_doc: string; nombres: string; apellidos: string; licencia: string }[]
   vehiculo_m1l: boolean
@@ -61,6 +64,7 @@ export function GuiasPage() {
   const { empresa, puede } = useAuth()
   const qc = useQueryClient()
   const [params, setParams] = useSearchParams()
+  const [nuevaGrt, setNuevaGrt] = useState(false)
   const [q, setQ] = useState("")
   const [estado, setEstado] = useState("todos")
   const [pagina, setPagina] = useState(1)
@@ -84,10 +88,15 @@ export function GuiasPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
+      {nuevaGrt && <NuevaGuiaTransportistaDialog onClose={() => setNuevaGrt(false)} onCreada={(id) => { setNuevaGrt(false); qc.invalidateQueries({ queryKey: ["guias"] }); setParams({ ver: String(id) }) }} />}
       <PageHeader
         title="Guías de remisión"
-        description="Guías de remisión remitente electrónicas (tipo 09) para sustentar el traslado de bienes."
-        actions={puede("guias.emitir") && <Button asChild><Link to="/guias/nueva"><PlusIcon /> Nueva guía</Link></Button>}
+        actions={puede("guias.emitir") && (
+          <>
+            <Button variant="outline" onClick={() => setNuevaGrt(true)}><TruckIcon /> Guía de transportista</Button>
+            <Button asChild><Link to="/guias/nueva"><PlusIcon /> Nueva guía</Link></Button>
+          </>
+        )}
       />
       <Card>
         <CardContent className="flex flex-col gap-4">
@@ -183,6 +192,13 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
                 <AlertTitle>No se completó el envío</AlertTitle>
                 <AlertDescription>{g.ultimo_error}</AlertDescription>
               </Alert>
+            )}
+            {g.remitente && (
+              <section>
+                <h3 className="mb-1 font-medium">Remitente</h3>
+                <p>{g.remitente.razon_social}</p>
+                <p className="tabular-nums text-xs text-muted-foreground">RUC {g.remitente.num_doc}{g.doc_relacionado ? ` · Doc. ${g.doc_relacionado.numero}` : ""}</p>
+              </section>
             )}
             <div className="flex flex-wrap gap-2">
               {(g.estado === "aceptado" ? (["pdf", "xml", "cdr"] as const) : g.estado !== "por_enviar" ? (["pdf"] as const) : []).map((t) => (
