@@ -37,6 +37,7 @@ import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { ConsultaDocumentosCard } from "./ConsultaDocumentosCard"
 import { useAuth } from "@/features/auth/auth-context"
 import { applyServerErrors, toApiError } from "@/lib/api"
 import type { CredencialApiEstado, Entorno } from "@/lib/types"
@@ -123,6 +124,7 @@ export function CredencialesApiPage() {
               />
             ))}
           </div>
+          <ConsultaDocumentosCard empresaId={empresa.id} />
           <p className="text-xs text-muted-foreground">
             Servidor de la API: <code className="rounded bg-muted px-1 py-0.5">{query.data.base_url}</code>
           </p>
