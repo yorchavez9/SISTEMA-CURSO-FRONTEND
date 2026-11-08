@@ -495,6 +495,7 @@ function RegimenTab({ p, empresaId, editable, onOk }: TabProps) {
   const [f, setF] = useState({ tax_regime: p.tax_regime ?? "general", nrus_categoria: p.nrus_categoria ? String(p.nrus_categoria) : "1", igv: p.igv_rate_override !== null ? String(p.igv_rate_override) : "" })
   const [e, setE] = useState<Errores>({})
   const g = useGuardar(empresaId, onOk, setE)
+  const cambioRegimen = f.tax_regime !== (p.tax_regime ?? "general") || (f.tax_regime === "rus" && Number(f.nrus_categoria) !== p.nrus_categoria)
   const guardar = () => g.mutate({
     tax_regime: f.tax_regime, nrus_categoria: f.tax_regime === "rus" ? Number(f.nrus_categoria) : null,
     igv_rate_override: f.igv === "" ? null : Number(f.igv),
@@ -507,11 +508,23 @@ function RegimenTab({ p, empresaId, editable, onOk }: TabProps) {
       </CardHeader>
       <CardContent>
         <FieldGroup>
-          <Alert variant="destructive">
-            <ShieldAlertIcon />
-            <AlertTitle>Cambia el régimen solo si SUNAT ya lo registró para tu RUC</AlertTitle>
-            <AlertDescription>Afecta a todos los comprobantes que se emitan desde ahora. En el Nuevo RUS solo se emiten boletas (sin facturas ni notas) y sin IGV.</AlertDescription>
-          </Alert>
+          {p.igv_rate_override !== null && (
+            <Alert>
+              <InfoIcon />
+              <AlertTitle>La cuenta tiene una tasa de IGV manual de {p.igv_rate_override}%</AlertTitle>
+              <AlertDescription>
+                Se aplica siempre, sin importar el régimen. Si no la necesitas (casos especiales como la Ley 31556), deja vacío el campo
+                “Tasa de IGV manual” y guarda para volver a la tasa del régimen.
+              </AlertDescription>
+            </Alert>
+          )}
+          {cambioRegimen && (
+            <Alert variant="destructive">
+              <ShieldAlertIcon />
+              <AlertTitle>Cambia el régimen solo si SUNAT ya lo registró para tu RUC</AlertTitle>
+              <AlertDescription>Afecta a todos los comprobantes que se emitan desde ahora. En el Nuevo RUS solo se emiten boletas (sin facturas ni notas) y sin IGV.</AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-4 sm:grid-cols-3">
             <Field data-invalid={!!e.tax_regime}>
               <FieldLabel>Régimen</FieldLabel>
