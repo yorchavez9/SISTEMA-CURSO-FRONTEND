@@ -33,6 +33,8 @@ import { api, toApiError } from "@/lib/api"
 import { cn } from "@/lib/utils"
 
 interface SerieDto { id: number; tipo_documento: string; serie: string; siguiente_numero: string; activo: boolean; predeterminada: boolean; sincronizado: boolean }
+/** Serie con el establecimiento al que pertenece (la venta debe salir del local de la caja abierta). */
+interface SerieLocal extends SerieDto { establecimiento_id: number; local: string }
 interface Linea {
   key: string
   producto_id: number | null
@@ -121,10 +123,17 @@ export function NuevaVentaPage() {
   const series = useQuery({
     queryKey: ["establecimientos", empresa?.id],
     enabled: !!empresa,
-    queryFn: async () => (await api.get<{ data: { establecimientos: { series: SerieDto[] }[] } }>("/establecimientos")).data.data,
-    select: (d) => d.establecimientos.flatMap((e) => e.series).filter((s) => s.activo && s.sincronizado),
+    queryFn: async () => (await api.get<{ data: { establecimientos: { id: number; nombre: string; cod_local: string; series: SerieDto[] }[] } }>("/establecimientos")).data.data,
+    select: (d) => d.establecimientos.flatMap((e) => e.series.map((s): SerieLocal => ({ ...s, establecimiento_id: e.id, local: `${e.cod_local} · ${e.nombre}` })))
+      .filter((s) => s.activo && s.sincronizado),
   })
-  const seriesTipo = useMemo(() => (series.data ?? []).filter((s) => s.tipo_documento === tipo), [series.data, tipo])
+  // Con caja abierta solo se ofrecen las series del establecimiento de esa caja (el backend lo exige al cobrar).
+  const estCaja = sesion?.caja.establecimiento_id ?? null
+  const seriesTipo = useMemo(
+    () => (series.data ?? []).filter((s) => s.tipo_documento === tipo && (estCaja === null || s.establecimiento_id === estCaja)),
+    [series.data, tipo, estCaja],
+  )
+  const otrasSeries = !!estCaja && seriesTipo.length === 0 && (series.data ?? []).some((s) => s.tipo_documento === tipo)
   useEffect(() => {
     if (!seriesTipo.some((s) => String(s.id) === serieId)) {
       const elegida = seriesTipo.find((s) => s.predeterminada) ?? seriesTipo[0]
@@ -222,7 +231,9 @@ export function NuevaVentaPage() {
   const sumaCuotas = cuotas.reduce((s, c) => s + Number(c.monto || 0), 0)
 
   const bloqueos: string[] = []
-  if (!serieId) bloqueos.push(`No hay series de ${tipo === "01" ? "factura" : "boleta"} activas y sincronizadas.`)
+  if (!serieId) bloqueos.push(otrasSeries
+    ? `El establecimiento de tu caja (${sesion?.caja.establecimiento ?? sesion?.caja.nombre}) no tiene series de ${tipo === "01" ? "factura" : "boleta"}. Créala en Configuración → Establecimientos y series, o abre una caja de otro local.`
+    : `No hay series de ${tipo === "01" ? "factura" : "boleta"} activas y sincronizadas.`)
   if (tipo === "01" && !cliente) bloqueos.push("La factura requiere un cliente con RUC.")
   if (tipo === "01" && cliente && cliente.tipo_documento !== "6" && !lineas.every((l) => l.tip_afe_igv === "40")) bloqueos.push("La factura requiere un cliente con RUC; para DNI emite una boleta.")
   if (tipo === "03" && (!cliente || cliente.tipo_documento === "0") && Number(total) >= 700) bloqueos.push("Las boletas desde S/ 700 deben identificar al comprador.")
@@ -270,10 +281,15 @@ export function NuevaVentaPage() {
                     {series.isLoading ? <Skeleton className="h-9" /> : (
                       <Select value={serieId} onValueChange={setSerieId} disabled={seriesTipo.length === 0}>
                         <SelectTrigger aria-label="Serie"><SelectValue placeholder="Sin series" /></SelectTrigger>
-                        <SelectContent>{seriesTipo.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.serie}</SelectItem>)}</SelectContent>
+                        <SelectContent>{seriesTipo.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.serie}{!estCaja && <span className="text-muted-foreground"> · {s.local}</span>}</SelectItem>)}</SelectContent>
                       </Select>
                     )}
-                    {serieSel && <FieldDescription>Siguiente: <span className="tabular-nums">{serieSel.siguiente_numero}</span></FieldDescription>}
+                    {serieSel && (
+                      <FieldDescription>
+                        Siguiente: <span className="tabular-nums">{serieSel.siguiente_numero}</span>
+                        {estCaja ? <> · local de tu caja ({serieSel.local})</> : <> · {serieSel.local}</>}
+                      </FieldDescription>
+                    )}
                   </Field>
                   <Field>
                     <FieldLabel>Cliente</FieldLabel>
