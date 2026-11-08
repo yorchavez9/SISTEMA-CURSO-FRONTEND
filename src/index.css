@@ -69,6 +69,15 @@
     --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.87 0 0);
     --series-1: #2a78d6; /* serie de datos: validado (contraste ≥3:1 sobre fondo claro) */
+    --tipo-factura: #1e4fa8;
+    --tipo-boleta: #c2570c;
+    --tipo-nc: #6d2fa8;
+    --tipo-nd: #12a594;
+    --estado-ok: #14734a;
+    --estado-aviso: #c08a00;
+    --estado-proceso: #1e4fa8;
+    --estado-mal: #b3261e;
+    --estado-anulado: #949494;
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
@@ -105,6 +114,15 @@
     --ring: oklch(0.556 0 0);
     --chart-1: oklch(0.87 0 0);
     --series-1: #3987e5; /* paso oscuro del mismo tono, validado sobre #171717 */
+    --tipo-factura: #2b6fd0;
+    --tipo-boleta: #f4b27a;
+    --tipo-nc: #8e4fc0;
+    --tipo-nd: #7fdccf;
+    --estado-ok: #1f8a5a;
+    --estado-aviso: #f0c95a;
+    --estado-proceso: #2b6fd0;
+    --estado-mal: #c7362e;
+    --estado-anulado: #c4c4c4;
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);

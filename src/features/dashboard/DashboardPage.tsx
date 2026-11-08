@@ -1,6 +1,6 @@
 import { Link } from "react-router"
 import { useQuery } from "@tanstack/react-query"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts"
 import { AlertTriangleIcon, ArrowDownRightIcon, ArrowUpRightIcon, CircleAlertIcon, MinusIcon, PlusIcon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -21,7 +21,7 @@ interface Dashboard {
   kpis: { ventas_hoy: number; ventas_mes: number; ventas_mes_anterior_a_la_fecha: number; comprobantes_mes: number; por_cobrar: number; saldos_a_favor: number }
   por_tipo: { tipo: string; cantidad: number; total: number }[]
   por_estado: { estado: string; cantidad: number }[]
-  ventas_por_dia: { fecha: string; total: number }[]
+  ventas_por_dia: { fecha: string; total: number; comprobantes: number }[]
   top_productos: { codigo: string; descripcion: string; cantidad: number; total: number }[]
   top_clientes: { documento: string; nombre: string; total: number; compras: number }[]
   recientes: { id: number; numero: string; tipo_documento: string; cliente: string; total: number; moneda: string; estado: string; fecha: string }[]
@@ -31,6 +31,16 @@ interface Dashboard {
 const TIPO: Record<string, string> = { "01": "Facturas", "03": "Boletas", "07": "Notas de crédito", "08": "Notas de débito" }
 // Una sola serie por gráfico: un tono validado (contraste ≥3:1 en claro y oscuro), sin leyenda; el título la nombra.
 const serie: ChartConfig = { total: { label: "Venta neta", color: "var(--series-1)" } }
+const serieOnda: ChartConfig = { comprobantes: { label: "Comprobantes", color: "var(--series-1)" } }
+// Cada tipo y cada estado conservan siempre su color; el orden evita vecinos confundibles con daltonismo.
+const COLOR_TIPO: Record<string, string> = { "01": "var(--tipo-factura)", "03": "var(--tipo-boleta)", "07": "var(--tipo-nc)", "08": "var(--tipo-nd)" }
+const GRUPOS_ESTADO = [
+  { nombre: "Aceptados", color: "var(--estado-ok)", estados: ["aceptado"] },
+  { nombre: "Observados", color: "var(--estado-aviso)", estados: ["observado"] },
+  { nombre: "En proceso", color: "var(--estado-proceso)", estados: ["enviado", "pendiente_resumen", "por_enviar"] },
+  { nombre: "Rechazados o con error", color: "var(--estado-mal)", estados: ["rechazado", "error"] },
+  { nombre: "Anulados", color: "var(--estado-anulado)", estados: ["anulado"] },
+]
 const corto = (iso: string) => new Date(iso + "T12:00:00").toLocaleDateString("es-PE", { day: "2-digit", month: "short" })
 const compacto = (n: number) => new Intl.NumberFormat("es-PE", { notation: "compact", maximumFractionDigits: 1 }).format(n)
 
@@ -81,7 +91,7 @@ export function DashboardPage() {
           extra={d && d.kpis.saldos_a_favor > 0 && <Link to="/cuentas-por-cobrar" className="text-xs underline underline-offset-4">{soles(d.kpis.saldos_a_favor)} a favor de clientes</Link>} />
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+      <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Venta neta diaria</CardTitle>
@@ -104,21 +114,48 @@ export function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
+            <CardTitle>Comprobantes por día</CardTitle>
+            <CardDescription>Últimos 30 días, sin anulados ni rechazados</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!d ? <Skeleton className="h-64" /> : (
+              <ChartContainer config={serieOnda} className="h-64 w-full">
+                <AreaChart data={d.ventas_por_dia} margin={{ left: 4, right: 4, top: 8 }}>
+                  <defs>
+                    <linearGradient id="relleno-onda" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--color-comprobantes)" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="var(--color-comprobantes)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} strokeOpacity={0.4} />
+                  <XAxis dataKey="fecha" tickLine={false} axisLine={false} tickMargin={8} minTickGap={24} tickFormatter={corto} />
+                  <YAxis tickLine={false} axisLine={false} width={32} allowDecimals={false} />
+                  <ChartTooltip content={<ChartTooltipContent labelFormatter={(_, p) => corto(p?.[0]?.payload?.fecha ?? "")} />} />
+                  <Area type="monotone" dataKey="comprobantes" stroke="var(--color-comprobantes)" strokeWidth={2} fill="url(#relleno-onda)" activeDot={{ r: 4 }} />
+                </AreaChart>
+              </ChartContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Comprobantes del mes por tipo</CardTitle>
+            <CardDescription>Cantidad emitida, sin anulados ni rechazados</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!d ? <Skeleton className="h-44" /> : <Dona datos={d.por_tipo.map((t) => ({ nombre: TIPO[t.tipo], valor: t.cantidad, color: COLOR_TIPO[t.tipo] }))} />}
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
             <CardTitle>Comprobantes del mes por estado</CardTitle>
             <CardDescription>Estado ante SUNAT</CardDescription>
           </CardHeader>
           <CardContent>
-            {!d ? <Skeleton className="h-48" /> : (
-              <ul className="flex flex-col gap-2">
-                {d.por_estado.filter((e) => e.cantidad > 0).map((e) => (
-                  <li key={e.estado} className="flex items-center justify-between">
-                    <EstadoBadge estado={e.estado as Parameters<typeof EstadoBadge>[0]["estado"]} />
-                    <span className="tabular-nums">{e.cantidad}</span>
-                  </li>
-                ))}
-                {d.por_estado.every((e) => e.cantidad === 0) && <li className="text-sm text-muted-foreground">Sin comprobantes este mes.</li>}
-              </ul>
-            )}
+            {!d ? <Skeleton className="h-44" /> : <Dona datos={GRUPOS_ESTADO.map((g) => ({ nombre: g.nombre, color: g.color, valor: d.por_estado.filter((e) => g.estados.includes(e.estado)).reduce((n, e) => n + e.cantidad, 0) }))} />}
           </CardContent>
         </Card>
       </div>
@@ -189,6 +226,41 @@ export function DashboardPage() {
           )}
         </CardContent>
       </Card>
+    </div>
+  )
+}
+
+function Dona({ datos }: { datos: { nombre: string; valor: number; color: string }[] }) {
+  const visibles = datos.filter((x) => x.valor > 0)
+  const total = visibles.reduce((n, x) => n + x.valor, 0)
+  if (total === 0) return <p className="text-sm text-muted-foreground">Sin comprobantes este mes.</p>
+  const config: ChartConfig = Object.fromEntries(visibles.map((x) => [x.nombre, { label: x.nombre, color: x.color }]))
+  return (
+    <div className="flex flex-col items-center gap-6 sm:flex-row">
+      <div className="relative size-44 shrink-0">
+        <ChartContainer config={config} className="aspect-square size-44">
+          <PieChart>
+            <ChartTooltip content={<ChartTooltipContent hideLabel nameKey="nombre" />} />
+            <Pie data={visibles} dataKey="valor" nameKey="nombre" innerRadius={60} outerRadius={84} paddingAngle={visibles.length > 1 ? 2 : 0} cornerRadius={4} stroke="none">
+              {visibles.map((x) => <Cell key={x.nombre} fill={x.color} />)}
+            </Pie>
+          </PieChart>
+        </ChartContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-2xl font-semibold tabular-nums">{total}</span>
+          <span className="text-xs text-muted-foreground">en total</span>
+        </div>
+      </div>
+      <ul className="flex w-full min-w-0 flex-col gap-2 text-sm">
+        {visibles.map((x) => (
+          <li key={x.nombre} className="flex items-center gap-2">
+            <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ background: x.color }} />
+            <span className="min-w-0 flex-1 truncate">{x.nombre}</span>
+            <span className="tabular-nums">{x.valor}</span>
+            <span className="w-11 text-right text-xs tabular-nums text-muted-foreground">{Math.round((x.valor / total) * 100)}%</span>
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
