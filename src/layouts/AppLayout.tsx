@@ -61,6 +61,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     group: "Configuración",
     items: [
       { to: "/configuracion/empresas", label: "Empresas", icon: Building2Icon },
+      { to: "/configuracion/perfil-facturacion", label: "Perfil de facturación", icon: ReceiptTextIcon, permiso: "empresas.ver" },
       { to: "/configuracion/establecimientos", label: "Establecimientos y series", icon: StoreIcon, permiso: "empresas.ver" },
       { to: "/configuracion/usuarios", label: "Usuarios y roles", icon: UsersIcon, permiso: "usuarios.ver" },
       { to: "/configuracion/tributaria", label: "Configuración tributaria", icon: LandmarkIcon, permiso: "configuracion_tributaria.ver" },

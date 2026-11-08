@@ -9,6 +9,7 @@ import { AuthProvider } from "@/features/auth/auth-context"
 import { LoginPage } from "@/features/auth/LoginPage"
 import { SetupPage } from "@/features/auth/SetupPage"
 import { CredencialesApiPage } from "@/features/empresas/CredencialesApiPage"
+import { PerfilFacturacionPage } from "@/features/empresas/PerfilFacturacionPage"
 import { EmpresasPage } from "@/features/empresas/EmpresasPage"
 import { EstablecimientosPage } from "@/features/empresas/EstablecimientosPage"
 import { DashboardPage } from "@/features/dashboard/DashboardPage"
@@ -61,6 +62,7 @@ const router = createBrowserRouter([
       { path: "productos", element: <ProductosPage /> },
       { path: "configuracion/empresas", element: <EmpresasPage /> },
       { path: "configuracion/credenciales-api", element: <CredencialesApiPage /> },
+      { path: "configuracion/perfil-facturacion", element: <PerfilFacturacionPage /> },
       { path: "configuracion/usuarios", element: <UsuariosPage /> },
       { path: "configuracion/establecimientos", element: <EstablecimientosPage /> },
       { path: "configuracion/tributaria", element: <ConfiguracionTributariaPage /> },
