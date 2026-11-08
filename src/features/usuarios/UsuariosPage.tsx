@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
   DropdownMenu,
@@ -55,8 +55,7 @@ export function UsuariosPage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageHeader
-        title="Usuarios y roles"
-        description={<>Usuarios de <span className="font-medium text-foreground">{empresa.razon_social}</span>. Cada usuario tiene un rol por empresa.</>}
+        title="Usuarios"
         actions={gestionar && roles.data && <NuevoUsuarioDialog empresaId={empresa.id} roles={roles.data.roles} />}
       />
       <Card>
@@ -286,7 +285,6 @@ function MatrizPermisos({ roles, modulos }: { roles: RolDef[]; modulos: { modulo
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><ShieldIcon className="size-4" />Permisos por rol</CardTitle>
-        <CardDescription>Qué puede hacer cada rol. El superadministrador tiene acceso total.</CardDescription>
       </CardHeader>
       <CardContent className="overflow-x-auto">
         <Table>

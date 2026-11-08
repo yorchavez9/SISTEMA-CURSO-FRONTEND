@@ -225,7 +225,7 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
           </DialogDescription>
         </DialogHeader>
         {op.isLoading ? <Skeleton className="h-64" /> : op.data && op.data.series.length === 0 ? (
-          <Alert variant="destructive"><AlertTitle>No hay series de {nombre(tipo)}</AlertTitle><AlertDescription>Crea una serie que empiece con {esRet ? "R" : "P"} en Configuración → Establecimientos y series.</AlertDescription></Alert>
+          <Alert variant="destructive"><AlertTitle>No hay series de {nombre(tipo)}</AlertTitle><AlertDescription>Crea una serie que empiece con {esRet ? "R" : "P"} en Configuración → Locales y series.</AlertDescription></Alert>
         ) : op.data && (
           <FieldGroup>
             <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">

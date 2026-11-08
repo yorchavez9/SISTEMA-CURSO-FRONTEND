@@ -54,31 +54,23 @@ export function PerfilFacturacionPage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageHeader
-        title="Perfil de facturación"
-        description="Datos de la empresa, logo, certificado digital, Clave SOL, mensajes del PDF y régimen tributario, tal como los usa la API de facturación."
+        title="Datos de la empresa"
       />
       {q.isLoading ? <Skeleton className="h-96" /> : q.isError ? (
         <Alert variant="destructive">
           <ShieldAlertIcon />
           <AlertTitle>No se pudo leer la configuración</AlertTitle>
-          <AlertDescription>{toApiError(q.error).message} Revisa las credenciales en Configuración → Credenciales API.</AlertDescription>
+          <AlertDescription>{toApiError(q.error).message} Revisa las credenciales en Configuración → Conexión API.</AlertDescription>
         </Alert>
       ) : q.data && empresa && (
         <>
           <Resumen p={q.data} />
-          <Alert>
-            <InfoIcon />
-            <AlertTitle>Se guarda en tu cuenta de la API ({q.data.entorno_api === "production" ? "producción" : "pruebas / beta"})</AlertTitle>
-            <AlertDescription>
-              Los cambios se aplican a los próximos comprobantes y sus PDF. Si otro sistema usa la misma cuenta de la API, también los verá.
-            </AlertDescription>
-          </Alert>
           <Tabs defaultValue="datos">
             <TabsList className="flex-wrap">
               <TabsTrigger value="datos"><Building2Icon /> Datos</TabsTrigger>
               <TabsTrigger value="pdf"><ReceiptTextIcon /> Logo y PDF</TabsTrigger>
               <TabsTrigger value="certificado"><FileKey2Icon /> Certificado</TabsTrigger>
-              <TabsTrigger value="sunat"><KeyRoundIcon /> Clave SOL y GRE</TabsTrigger>
+              <TabsTrigger value="sunat"><KeyRoundIcon /> Claves SUNAT</TabsTrigger>
               <TabsTrigger value="regimen"><LandmarkIcon /> Régimen</TabsTrigger>
             </TabsList>
             {/* key: cada pestaña reinicia su formulario cuando llega un perfil nuevo */}
@@ -169,10 +161,6 @@ function DatosTab({ p, empresaId, editable, onOk }: TabProps) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Datos de la empresa</CardTitle>
-        <CardDescription>Aparecen en el encabezado del XML y del PDF de cada comprobante. El RUC no se puede cambiar.</CardDescription>
-      </CardHeader>
       <CardContent>
         <FieldGroup>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -207,7 +195,7 @@ function DatosTab({ p, empresaId, editable, onOk }: TabProps) {
           </div>
         </FieldGroup>
       </CardContent>
-      <Pie editable={editable} pendiente={g.isPending} onGuardar={guardar}>Hasta 5 teléfonos y 5 correos.</Pie>
+      <Pie editable={editable} pendiente={g.isPending} onGuardar={guardar} />
     </Card>
   )
 }
@@ -263,7 +251,6 @@ function PdfTab({ p, empresaId, editable, onOk }: TabProps) {
       <Card>
         <CardHeader>
           <CardTitle>Mensajes y medios de pago del PDF</CardTitle>
-          <CardDescription>Se imprimen al pie del comprobante (A4, A5 y ticket).</CardDescription>
         </CardHeader>
         <CardContent>
           <FieldGroup>
@@ -332,7 +319,7 @@ function PdfTab({ p, empresaId, editable, onOk }: TabProps) {
             </FieldSet>
           </FieldGroup>
         </CardContent>
-        <Pie editable={editable} pendiente={g.isPending} onGuardar={guardar}>Para verlo, imprime cualquier comprobante nuevo.</Pie>
+        <Pie editable={editable} pendiente={g.isPending} onGuardar={guardar} />
       </Card>
     </div>
   )
@@ -359,7 +346,7 @@ function LogoCard({ p, empresaId, editable, onOk }: TabProps) {
     <Card>
       <CardHeader>
         <CardTitle>Logo</CardTitle>
-        <CardDescription>Aparece en los PDF de facturas, boletas, notas y guías. PNG o JPG hasta 2 MB; mejor con fondo blanco o transparente y formato horizontal.</CardDescription>
+        <CardDescription>PNG o JPG, hasta 2 MB.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
         <div className="flex h-28 w-56 items-center justify-center overflow-hidden rounded-lg bg-white p-2 ring-1 ring-foreground/10">
@@ -400,14 +387,12 @@ function CertificadoTab({ p, empresaId, editable, onOk }: TabProps) {
     <Card>
       <CardHeader>
         <CardTitle>Certificado digital</CardTitle>
-        <CardDescription>Con él se firman los XML que se envían a SUNAT. Renuévalo antes de que venza (suele durar un año).</CardDescription>
       </CardHeader>
       <CardContent>
         <FieldGroup>
           <Alert variant={p.tiene_certificado ? "default" : "destructive"}>
             {p.tiene_certificado ? <BadgeCheckIcon /> : <ShieldAlertIcon />}
-            <AlertTitle>{p.tiene_certificado ? "Hay un certificado cargado en la API" : "No hay certificado cargado"}</AlertTitle>
-            <AlertDescription>Sube uno nuevo solo para reemplazarlo. El archivo y su contraseña se envían directo a la API y no se guardan en este sistema.</AlertDescription>
+            <AlertTitle>{p.tiene_certificado ? "Certificado cargado" : "Sin certificado"}</AlertTitle>
           </Alert>
           {editable && (
             <div className="grid gap-4 sm:grid-cols-2">
@@ -451,7 +436,6 @@ function SunatTab({ p, empresaId, editable, onOk }: TabProps) {
     <Card>
       <CardHeader>
         <CardTitle>Clave SOL y credenciales de guías (GRE)</CardTitle>
-        <CardDescription>La Clave SOL la usa la API para enviar a SUNAT; el client_id/secret de la plataforma GRE, para las guías de remisión. Las contraseñas no se muestran ni se guardan en este sistema.</CardDescription>
       </CardHeader>
       <CardContent>
         <FieldGroup>
@@ -483,7 +467,7 @@ function SunatTab({ p, empresaId, editable, onOk }: TabProps) {
       </CardContent>
       <Pie editable={editable} pendiente={g.isPending}
         onGuardar={() => g.mutate({ sol_user: f.sol_user || null, client_id: f.client_id || null, sol_pass: f.sol_pass || null, client_secret: f.client_secret || null })}>
-        Deja una contraseña vacía para conservar la actual.
+        Vacío = conservar la actual.
       </Pie>
     </Card>
   )
@@ -504,7 +488,7 @@ function RegimenTab({ p, empresaId, editable, onOk }: TabProps) {
     <Card>
       <CardHeader>
         <CardTitle>Régimen tributario</CardTitle>
-        <CardDescription>Define la tasa de IGV que se aplica al emitir. Tasa vigente hoy: <span className="tabular-nums font-medium">{p.tasa_igv_vigente ?? "—"}%</span>.</CardDescription>
+        <CardDescription>IGV vigente: <span className="tabular-nums font-medium">{p.tasa_igv_vigente ?? "—"}%</span></CardDescription>
       </CardHeader>
       <CardContent>
         <FieldGroup>
@@ -512,17 +496,13 @@ function RegimenTab({ p, empresaId, editable, onOk }: TabProps) {
             <Alert>
               <InfoIcon />
               <AlertTitle>La cuenta tiene una tasa de IGV manual de {p.igv_rate_override}%</AlertTitle>
-              <AlertDescription>
-                Se aplica siempre, sin importar el régimen. Si no la necesitas (casos especiales como la Ley 31556), deja vacío el campo
-                “Tasa de IGV manual” y guarda para volver a la tasa del régimen.
-              </AlertDescription>
+              <AlertDescription>Se aplica sobre cualquier régimen. Vacía el campo y guarda para quitarla.</AlertDescription>
             </Alert>
           )}
           {cambioRegimen && (
             <Alert variant="destructive">
               <ShieldAlertIcon />
-              <AlertTitle>Cambia el régimen solo si SUNAT ya lo registró para tu RUC</AlertTitle>
-              <AlertDescription>Afecta a todos los comprobantes que se emitan desde ahora. En el Nuevo RUS solo se emiten boletas (sin facturas ni notas) y sin IGV.</AlertDescription>
+              <AlertTitle>Cámbialo solo si SUNAT ya lo registró para tu RUC</AlertTitle>
             </Alert>
           )}
           <div className="grid gap-4 sm:grid-cols-3">
@@ -547,13 +527,12 @@ function RegimenTab({ p, empresaId, editable, onOk }: TabProps) {
             <Field data-invalid={!!e.igv_rate_override}>
               <FieldLabel htmlFor="pf-igv">Tasa de IGV manual (avanzado)</FieldLabel>
               <Input id="pf-igv" className="tabular-nums" inputMode="decimal" placeholder="Vacío = la del régimen" value={f.igv} disabled={!editable} onChange={(ev) => setF({ ...f, igv: ev.target.value })} />
-              <FieldDescription>Solo casos especiales (p. ej. restaurantes y hoteles con tasa reducida, Ley 31556). Entre 0 y 30.</FieldDescription>
               <FieldError errors={err(e, "igv_rate_override")} />
             </Field>
           </div>
         </FieldGroup>
       </CardContent>
-      <Pie editable={editable} pendiente={g.isPending} onGuardar={guardar}>El cálculo del sistema toma la nueva tasa en cuanto se guarda.</Pie>
+      <Pie editable={editable} pendiente={g.isPending} onGuardar={guardar} />
     </Card>
   )
 }

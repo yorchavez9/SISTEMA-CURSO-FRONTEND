@@ -124,7 +124,7 @@ export function InventarioPage() {
             </Field>
           </div>
           {almacenes.data?.length === 0 ? (
-            <Alert><AlertDescription>No hay establecimientos. Sincroniza en Configuración → Establecimientos y series.</AlertDescription></Alert>
+            <Alert><AlertDescription>No hay establecimientos. Sincroniza en Configuración → Locales y series.</AlertDescription></Alert>
           ) : stock.isLoading ? <Skeleton className="h-40" /> : stock.isError ? (
             <Alert variant="destructive"><AlertDescription>{toApiError(stock.error).message}</AlertDescription></Alert>
           ) : stock.data?.data.length === 0 ? (

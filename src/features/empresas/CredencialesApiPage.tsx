@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardAction } from "@/components/ui/card"
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from "@/components/ui/input-group"
@@ -36,6 +36,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PageHeader } from "@/components/shared/PageHeader"
 import { ConsultaDocumentosCard } from "./ConsultaDocumentosCard"
 import { useAuth } from "@/features/auth/auth-context"
@@ -49,14 +50,12 @@ import {
   useVerificarCredenciales,
 } from "./credenciales-api.api"
 
-const ENTORNO_INFO: Record<Entorno, { titulo: string; descripcion: string }> = {
+const ENTORNO_INFO: Record<Entorno, { titulo: string }> = {
   pruebas: {
     titulo: "Pruebas",
-    descripcion: "Credenciales de una empresa en entorno beta de SUNAT. Los comprobantes no tienen validez tributaria.",
   },
   produccion: {
     titulo: "Producción",
-    descripcion: "Credenciales de la empresa en entorno de producción. Los comprobantes se informan a SUNAT con validez legal.",
   },
 }
 
@@ -70,7 +69,7 @@ export function CredencialesApiPage() {
   if (!empresa) {
     return (
       <>
-        <PageHeader title="Credenciales API" />
+        <PageHeader title="Conexión API" />
         <Alert>
           <CircleAlertIcon />
           <AlertTitle>No hay empresa seleccionada</AlertTitle>
@@ -86,22 +85,9 @@ export function CredencialesApiPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-      <PageHeader
-        title="Credenciales API de facturación"
-        description={
-          <>
-            API Key y API Secret de <span className="font-medium text-foreground">{empresa.razon_social}</span> (RUC {empresa.ruc}). Se
-            guardan cifrados en el servidor y nunca se vuelven a mostrar.
-          </>
-        }
-      />
+      <PageHeader title="Conexión API" />
 
-      {query.isLoading && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-96" />
-          <Skeleton className="h-96" />
-        </div>
-      )}
+      {query.isLoading && <Skeleton className="h-96" />}
 
       {query.isError && (
         <Alert variant="destructive">
@@ -114,21 +100,18 @@ export function CredencialesApiPage() {
       {query.data && (
         <>
           <EntornoActivoCard empresaId={empresa.id} actual={query.data.entorno_activo} estados={query.data.entornos} />
-          <div className="grid items-start gap-6 lg:grid-cols-2">
+          <Tabs defaultValue={query.data.entorno_activo}>
+            <TabsList>
+              {query.data.entornos.map((e) => <TabsTrigger key={e.entorno} value={e.entorno}>{ENTORNO_INFO[e.entorno].titulo}</TabsTrigger>)}
+              <TabsTrigger value="consulta">Consulta RUC/DNI</TabsTrigger>
+            </TabsList>
             {query.data.entornos.map((estado) => (
-              <CredencialCard
-                key={estado.entorno}
-                empresaId={empresa.id}
-                estado={estado}
-                urlDefecto={query.data.base_url}
-                enUso={estado.entorno === query.data.entorno_activo}
-              />
+              <TabsContent key={estado.entorno} value={estado.entorno}>
+                <CredencialCard empresaId={empresa.id} estado={estado} urlDefecto={query.data.base_url} enUso={estado.entorno === query.data.entorno_activo} />
+              </TabsContent>
             ))}
-          </div>
-          <ConsultaDocumentosCard empresaId={empresa.id} />
-          <p className="text-xs text-muted-foreground">
-            Servidor de la API: <code className="rounded bg-muted px-1 py-0.5">{query.data.base_url}</code>
-          </p>
+            <TabsContent value="consulta"><ConsultaDocumentosCard empresaId={empresa.id} /></TabsContent>
+          </Tabs>
         </>
       )}
     </div>
@@ -162,7 +145,6 @@ function EntornoActivoCard({ empresaId, actual, estados }: { empresaId: number; 
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><ShieldCheckIcon className="size-4" />Entorno de emisión</CardTitle>
-        <CardDescription>Qué credenciales usa el sistema al emitir comprobantes para esta empresa.</CardDescription>
         <CardAction>
           <Select
             value={actual}
@@ -267,7 +249,6 @@ function CredencialCard({ empresaId, estado, enUso, urlDefecto }: { empresaId: n
           {info.titulo}
           {enUso && <Badge variant="outline">En uso</Badge>}
         </CardTitle>
-        <CardDescription>{info.descripcion}</CardDescription>
         <CardAction><EstadoBadge estado={estado} /></CardAction>
       </CardHeader>
 
@@ -318,7 +299,7 @@ function CredencialCard({ empresaId, estado, enUso, urlDefecto }: { empresaId: n
                 aria-invalid={!!errors.base_url}
                 {...form.register("base_url")}
               />
-              <FieldDescription>Déjala vacía para usar la por defecto ({urlDefecto}). Al cambiarla se vuelve a verificar la conexión.</FieldDescription>
+              <FieldDescription>Vacía = {urlDefecto}</FieldDescription>
               <FieldError errors={[errors.base_url]} />
             </Field>
             <Field data-invalid={!!errors.api_key}>
@@ -355,7 +336,6 @@ function CredencialCard({ empresaId, estado, enUso, urlDefecto }: { empresaId: n
                   </InputGroupButton>
                 </InputGroupAddon>
               </InputGroup>
-              {estado.configurada && <FieldDescription>El secreto guardado nunca se muestra.</FieldDescription>}
               <FieldError errors={[errors.api_secret]} />
             </Field>
           </FieldGroup>

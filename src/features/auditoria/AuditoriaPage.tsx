@@ -72,7 +72,7 @@ export function AuditoriaPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
-      <PageHeader title="Auditoría" description="Registro de las acciones sensibles realizadas en la empresa: quién, cuándo y qué cambió. Solo lectura." />
+      <PageHeader title="Auditoría" />
       <Card>
         <CardContent className="flex flex-col gap-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

@@ -9,9 +9,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardAction, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -63,6 +63,17 @@ export function EstablecimientosPage() {
   const cat = useCatalogos()
   const tipoLabel = (c: string) => cat.data?.catalogos["01"]?.find((t) => t.codigo === c)?.descripcion ?? c
   const editar = puede("empresas.editar")
+  const refrescar = () => qc.invalidateQueries({ queryKey: key })
+  const [localId, setLocalId] = useState<string | null>(null)
+  const [verInactivas, setVerInactivas] = useState(false)
+  // Un local a la vez: el elegido o, por defecto, el primero que tenga series activas.
+  const locales = q.data?.establecimientos ?? []
+  const porDefecto = locales.find((e) => e.series.some((s) => s.activo)) ?? locales[0]
+  const seleccion = localId ?? (porDefecto ? String(porDefecto.id) : "sin")
+  const local = locales.find((e) => String(e.id) === seleccion)
+  const series = local?.series ?? (seleccion === "sin" ? q.data?.series_sin_establecimiento ?? [] : [])
+  const inactivas = series.filter((s) => !s.activo).length
+  const visibles = verInactivas ? series : series.filter((s) => s.activo)
 
   const sincronizar = useMutation({
     mutationFn: async () => (await api.post<{ message: string }>("/establecimientos/sincronizar")).data,
@@ -73,21 +84,20 @@ export function EstablecimientosPage() {
     onError: (e) => toast.error(Object.values(toApiError(e).errors)[0]?.[0] ?? toApiError(e).message),
   })
 
-  if (!empresa) return <PageHeader title="Establecimientos y series" description="Selecciona una empresa." />
+  if (!empresa) return <PageHeader title="Locales y series" description="Selecciona una empresa." />
   const vacio = q.data && q.data.establecimientos.length === 0 && q.data.series_sin_establecimiento.length === 0
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageHeader
-        title="Establecimientos y series"
-        description="Locales anexos (código SUNAT) y series de comprobantes. Se mantienen sincronizados con la API de facturación."
+        title="Locales y series"
         actions={
           editar && (
             <>
               <Button variant="outline" onClick={() => sincronizar.mutate()} disabled={sincronizar.isPending}>
-                {sincronizar.isPending ? <Spinner /> : <RefreshCwIcon />} Sincronizar con la API
+                {sincronizar.isPending ? <Spinner /> : <RefreshCwIcon />} Sincronizar
               </Button>
-              {q.data && q.data.establecimientos.length > 0 && <NuevoEstablecimiento onDone={() => qc.invalidateQueries({ queryKey: key })} />}
+              {q.data && q.data.establecimientos.length > 0 && <NuevoEstablecimiento onDone={refrescar} />}
             </>
           )
         }
@@ -97,42 +107,39 @@ export function EstablecimientosPage() {
       {vacio && (
         <Alert>
           <StoreIcon />
-          <AlertTitle>Aún no hay establecimientos</AlertTitle>
-          <AlertDescription>
-            <p>Pulsa <span className="font-medium">Sincronizar con la API</span> para importar los establecimientos y las series de tu cuenta, con su último correlativo usado.</p>
-          </AlertDescription>
+          <AlertTitle>Aún no hay locales</AlertTitle>
+          <AlertDescription>Pulsa Sincronizar para importarlos.</AlertDescription>
         </Alert>
       )}
-      {q.data?.establecimientos.map((e) => (
-        <Card key={e.id}>
+      {q.data && !vacio && (
+        <Card>
           <CardHeader>
-            <CardTitle className="flex flex-wrap items-center gap-2">
-              {e.nombre}
-              <Badge variant="outline" className="tabular-nums">{e.cod_local}</Badge>
-              {e.es_principal && <Badge variant="secondary">Principal</Badge>}
-            </CardTitle>
-            <CardDescription>{e.direccion ?? "Sin dirección registrada"}</CardDescription>
+            <div className="flex flex-col gap-1">
+              <Select value={seleccion} onValueChange={setLocalId}>
+                <SelectTrigger aria-label="Local" className="w-full sm:w-80"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {q.data.establecimientos.map((e) => <SelectItem key={e.id} value={String(e.id)}>{e.cod_local} · {e.nombre}</SelectItem>)}
+                  {q.data.series_sin_establecimiento.length > 0 && <SelectItem value="sin">Sin local asignado</SelectItem>}
+                </SelectContent>
+              </Select>
+              {local?.direccion && <CardDescription className="truncate">{local.direccion}</CardDescription>}
+            </div>
             <CardAction className="flex items-center gap-2">
-              <SyncBadge ok={e.sincronizado} />
-              {editar && e.sincronizado && cat.data && (
-                <NuevaSerie establecimiento={e} tipoLabel={tipoLabel} onDone={() => qc.invalidateQueries({ queryKey: key })} />
-              )}
+              {local && !local.sincronizado && <SyncBadge ok={false} />}
+              {editar && local?.sincronizado && cat.data && <NuevaSerie establecimiento={local} tipoLabel={tipoLabel} onDone={refrescar} />}
             </CardAction>
           </CardHeader>
-          <CardContent>
-            {e.series.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Sin series en este establecimiento.</p>
+          <CardContent className="flex flex-col gap-3">
+            {visibles.length === 0 ? (
+              <p className="py-6 text-center text-sm text-muted-foreground">Sin series activas en este local.</p>
             ) : (
-              <SeriesTabla series={e.series} tipoLabel={tipoLabel} editar={editar} onDone={() => qc.invalidateQueries({ queryKey: key })} />
+              <SeriesTabla series={visibles} tipoLabel={tipoLabel} editar={editar} onDone={refrescar} />
             )}
-          </CardContent>
-        </Card>
-      ))}
-      {q.data && q.data.series_sin_establecimiento.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle>Series sin establecimiento</CardTitle></CardHeader>
-          <CardContent>
-            <SeriesTabla series={q.data.series_sin_establecimiento} tipoLabel={tipoLabel} editar={editar} onDone={() => qc.invalidateQueries({ queryKey: key })} />
+            {inactivas > 0 && (
+              <Button variant="ghost" size="sm" className="self-start" onClick={() => setVerInactivas((v) => !v)}>
+                {verInactivas ? "Ocultar inactivas" : `Ver inactivas (${inactivas})`}
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
@@ -142,9 +149,9 @@ export function EstablecimientosPage() {
 
 function SyncBadge({ ok }: { ok: boolean }) {
   return ok ? (
-    <Badge variant="outline"><CloudCheckIcon data-icon="inline-start" />En la API</Badge>
+    <Badge variant="outline"><CloudCheckIcon data-icon="inline-start" />Sincronizado</Badge>
   ) : (
-    <Badge variant="destructive"><CloudOffIcon data-icon="inline-start" />Solo local</Badge>
+    <Badge variant="destructive"><CloudOffIcon data-icon="inline-start" />Sin sincronizar</Badge>
   )
 }
 
@@ -163,7 +170,7 @@ function SeriesTabla({ series, tipoLabel, editar, onDone }: { series: SerieDto[]
         <TableRow>
           <TableHead>Comprobante</TableHead>
           <TableHead>Serie</TableHead>
-          <TableHead className="text-right">Último usado</TableHead>
+          <TableHead className="text-right">Correlativo</TableHead>
           <TableHead>Siguiente</TableHead>
           <TableHead>Activa</TableHead>
           <TableHead>
@@ -171,7 +178,7 @@ function SeriesTabla({ series, tipoLabel, editar, onDone }: { series: SerieDto[]
               Predeterminada
               <Tooltip>
                 <TooltipTrigger asChild><InfoIcon className="size-3.5 text-muted-foreground" aria-label="Qué es la serie predeterminada" /></TooltipTrigger>
-                <TooltipContent className="max-w-64">La que se preselecciona al emitir. Una por tipo de comprobante (y por familia F/B en notas). Es una preferencia de este sistema: no cambia nada en la API.</TooltipContent>
+                <TooltipContent className="max-w-64">La que se elige sola al emitir.</TooltipContent>
               </Tooltip>
             </span>
           </TableHead>
@@ -234,11 +241,11 @@ function NuevoEstablecimiento({ onDone }: { onDone: () => void }) {
   })
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button><PlusIcon /> Establecimiento</Button></DialogTrigger>
+      <DialogTrigger asChild><Button><PlusIcon /> Local</Button></DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Nuevo establecimiento</DialogTitle>
-          <DialogDescription>Se registra también en la API de facturación.</DialogDescription>
+          <DialogTitle>Nuevo local</DialogTitle>
+          <DialogDescription className="sr-only">Datos del local</DialogDescription>
         </DialogHeader>
         <form id="form-est" onSubmit={onSubmit} noValidate>
           <FieldGroup>
@@ -318,7 +325,6 @@ function NuevaSerie({ establecimiento, tipoLabel, onDone }: { establecimiento: E
           <Field data-invalid={!!error}>
             <FieldLabel htmlFor="s-serie">Serie</FieldLabel>
             <Input id="s-serie" maxLength={4} placeholder={PREFIJO[tipo]} className="tabular-nums uppercase" value={serie} onChange={(e) => setSerie(e.target.value)} aria-invalid={!!error} />
-            <FieldDescription>4 caracteres. Facturas empiezan con F, boletas con B; las notas con F o B según el documento que modifican.</FieldDescription>
             {error && <FieldError>{error}</FieldError>}
           </Field>
         </FieldGroup>

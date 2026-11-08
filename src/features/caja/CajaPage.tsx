@@ -69,7 +69,7 @@ function AbrirCaja({ cajas, onAbierta }: { cajas: { id: number; nombre: string; 
       </CardHeader>
       <CardContent>
         {cajas.length === 0 ? (
-          <Alert><AlertDescription>No hay establecimientos. Sincroniza en Configuración → Establecimientos y series.</AlertDescription></Alert>
+          <Alert><AlertDescription>No hay establecimientos. Sincroniza en Configuración → Locales y series.</AlertDescription></Alert>
         ) : (
           <FieldGroup>
             <Field>

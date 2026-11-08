@@ -232,7 +232,7 @@ export function NuevaVentaPage() {
 
   const bloqueos: string[] = []
   if (!serieId) bloqueos.push(otrasSeries
-    ? `El establecimiento de tu caja (${sesion?.caja.establecimiento ?? sesion?.caja.nombre}) no tiene series de ${tipo === "01" ? "factura" : "boleta"}. Créala en Configuración → Establecimientos y series, o abre una caja de otro local.`
+    ? `El establecimiento de tu caja (${sesion?.caja.establecimiento ?? sesion?.caja.nombre}) no tiene series de ${tipo === "01" ? "factura" : "boleta"}. Créala en Configuración → Locales y series, o abre una caja de otro local.`
     : `No hay series de ${tipo === "01" ? "factura" : "boleta"} activas y sincronizadas.`)
   if (tipo === "01" && !cliente) bloqueos.push("La factura requiere un cliente con RUC.")
   if (tipo === "01" && cliente && cliente.tipo_documento !== "6" && !lineas.every((l) => l.tip_afe_igv === "40")) bloqueos.push("La factura requiere un cliente con RUC; para DNI emite una boleta.")

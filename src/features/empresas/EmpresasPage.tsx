@@ -63,7 +63,6 @@ export function EmpresasPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <PageHeader
         title="Empresas"
-        description="Empresas emisoras registradas en el sistema."
         actions={user?.is_superadmin && <NuevaEmpresaDialog onCreated={async (e) => { await refresh(); setEmpresaId(e.id) }} />}
       />
       <Card>

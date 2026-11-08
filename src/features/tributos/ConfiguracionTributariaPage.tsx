@@ -36,8 +36,7 @@ export function ConfiguracionTributariaPage() {
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
       <PageHeader
-        title="Configuración tributaria"
-        description="Catálogos SUNAT y reglas de cálculo que usa el sistema. El estado “Validado” indica evidencia real en SUNAT beta."
+        title="Catálogos SUNAT"
       />
       {q.isLoading && <Skeleton className="h-96" />}
       {q.isError && <Alert variant="destructive"><AlertDescription>{toApiError(q.error).message}</AlertDescription></Alert>}
@@ -97,7 +96,6 @@ function Afectaciones({ items }: { items: AfectacionIgv[] }) {
       <Card>
         <CardHeader>
           <CardTitle>Catálogo 07 · Tipos de afectación del IGV</CardTitle>
-          <CardDescription>Cada producto tiene una afectación por defecto y puede cambiarse por ítem al emitir.</CardDescription>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <Table>

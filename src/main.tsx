@@ -10,6 +10,7 @@ import { LoginPage } from "@/features/auth/LoginPage"
 import { SetupPage } from "@/features/auth/SetupPage"
 import { CredencialesApiPage } from "@/features/empresas/CredencialesApiPage"
 import { PerfilFacturacionPage } from "@/features/empresas/PerfilFacturacionPage"
+import { ConfiguracionLayout } from "@/layouts/ConfiguracionLayout"
 import { EmpresasPage } from "@/features/empresas/EmpresasPage"
 import { EstablecimientosPage } from "@/features/empresas/EstablecimientosPage"
 import { DashboardPage } from "@/features/dashboard/DashboardPage"
@@ -62,13 +63,19 @@ const router = createBrowserRouter([
       { path: "inventario", element: <InventarioPage /> },
       { path: "clientes", element: <ClientesPage /> },
       { path: "productos", element: <ProductosPage /> },
-      { path: "configuracion/empresas", element: <EmpresasPage /> },
-      { path: "configuracion/credenciales-api", element: <CredencialesApiPage /> },
-      { path: "configuracion/perfil-facturacion", element: <PerfilFacturacionPage /> },
-      { path: "configuracion/usuarios", element: <UsuariosPage /> },
-      { path: "configuracion/establecimientos", element: <EstablecimientosPage /> },
-      { path: "configuracion/tributaria", element: <ConfiguracionTributariaPage /> },
-      { path: "configuracion/auditoria", element: <AuditoriaPage /> },
+      {
+        path: "configuracion",
+        element: <ConfiguracionLayout />,
+        children: [
+          { path: "empresas", element: <EmpresasPage /> },
+          { path: "credenciales-api", element: <CredencialesApiPage /> },
+          { path: "perfil-facturacion", element: <PerfilFacturacionPage /> },
+          { path: "usuarios", element: <UsuariosPage /> },
+          { path: "establecimientos", element: <EstablecimientosPage /> },
+          { path: "tributaria", element: <ConfiguracionTributariaPage /> },
+          { path: "auditoria", element: <AuditoriaPage /> },
+        ],
+      },
     ],
   },
 ])

@@ -1,5 +1,5 @@
 import { matchPath, Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router"
-import { BanIcon, CalendarClockIcon, FileTextIcon, ScrollTextIcon, TruckIcon, BoxesIcon, ChartColumnIcon, Building2Icon, FileCheck2Icon, HandCoinsIcon, WalletIcon, ShoppingCartIcon, ChevronsUpDownIcon, HomeIcon, KeyRoundIcon, LandmarkIcon, LogOutIcon, PackageIcon, ReceiptTextIcon, StoreIcon, UsersIcon, UsersRoundIcon } from "lucide-react"
+import { BanIcon, CalendarClockIcon, FileTextIcon, TruckIcon, BoxesIcon, ChartColumnIcon, Building2Icon, FileCheck2Icon, HandCoinsIcon, WalletIcon, ShoppingCartIcon, ChevronsUpDownIcon, HomeIcon, LogOutIcon, PackageIcon, ReceiptTextIcon, SettingsIcon, UsersRoundIcon } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -30,8 +30,9 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/features/auth/auth-context"
+import { PERMISOS_CONFIGURACION } from "@/layouts/configuracion-secciones"
 
-type NavItem = { to: string; label: string; icon: typeof HomeIcon; end?: boolean; permiso?: string }
+type NavItem = { to: string; label: string; icon: typeof HomeIcon; end?: boolean; permiso?: string; permisos?: string[] }
 
 const NAV: { group: string; items: NavItem[] }[] = [
   {
@@ -59,16 +60,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
     ],
   },
   {
-    group: "Configuración",
-    items: [
-      { to: "/configuracion/empresas", label: "Empresas", icon: Building2Icon },
-      { to: "/configuracion/perfil-facturacion", label: "Perfil de facturación", icon: ReceiptTextIcon, permiso: "empresas.ver" },
-      { to: "/configuracion/establecimientos", label: "Establecimientos y series", icon: StoreIcon, permiso: "empresas.ver" },
-      { to: "/configuracion/usuarios", label: "Usuarios y roles", icon: UsersIcon, permiso: "usuarios.ver" },
-      { to: "/configuracion/tributaria", label: "Configuración tributaria", icon: LandmarkIcon, permiso: "configuracion_tributaria.ver" },
-      { to: "/configuracion/credenciales-api", label: "Credenciales API", icon: KeyRoundIcon, permiso: "credenciales_api.gestionar" },
-      { to: "/configuracion/auditoria", label: "Auditoría", icon: ScrollTextIcon, permiso: "auditoria.ver" },
-    ],
+    group: "Sistema",
+    items: [{ to: "/configuracion", label: "Configuración", icon: SettingsIcon, permisos: PERMISOS_CONFIGURACION }],
   },
 ]
 
@@ -149,17 +142,21 @@ function AppSidebar() {
                   </DropdownMenuItem>
                 ))}
                 {user.empresas.length === 0 && <DropdownMenuItem disabled>No hay empresas</DropdownMenuItem>}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate("/configuracion/empresas")}>
-                  <Building2Icon /> Administrar empresas
-                </DropdownMenuItem>
+                {user.is_superadmin && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onSelect={() => navigate("/configuracion/empresas")}>
+                      <Building2Icon /> Administrar empresas
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {NAV.map((g) => ({ ...g, items: g.items.filter((i) => !i.permiso || puede(i.permiso)) }))
+        {NAV.map((g) => ({ ...g, items: g.items.filter((i) => (i.permisos ? i.permisos.some(puede) || !!user?.is_superadmin : !i.permiso || puede(i.permiso))) }))
           .filter((g) => g.items.length > 0)
           .map((g) => (
           <SidebarGroup key={g.group}>
