@@ -68,16 +68,29 @@
     --input: transparent;
     --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.87 0 0);
-    --series-1: #2a78d6; /* serie de datos: validado (contraste ≥3:1 sobre fondo claro) */
-    --tipo-factura: #1e4fa8;
-    --tipo-boleta: #c2570c;
-    --tipo-nc: #6d2fa8;
-    --tipo-nd: #12a594;
-    --estado-ok: #14734a;
-    --estado-aviso: #c08a00;
-    --estado-proceso: #1e4fa8;
-    --estado-mal: #b3261e;
-    --estado-anulado: #949494;
+    --series-1: #2563eb;
+    --series-2: #c026d3;
+    --series-3: #ea580c;
+    --tipo-factura: #1d4ed8;
+    --tipo-boleta: #ea580c;
+    --tipo-nc: #a21caf;
+    --tipo-nd: #16a34a;
+    --estado-ok: #16a34a;
+    --estado-aviso: #d97706;
+    --estado-proceso: #2563eb;
+    --estado-mal: #dc2626;
+    --estado-anulado: #64748b;
+    --ic-azul: #2563eb;
+    --ic-cielo: #0284c7;
+    --ic-violeta: #7c3aed;
+    --ic-fucsia: #c026d3;
+    --ic-rosa: #e11d48;
+    --ic-naranja: #ea580c;
+    --ic-ambar: #d97706;
+    --ic-verde: #16a34a;
+    --ic-esmeralda: #059669;
+    --ic-teal: #0d9488;
+    --ic-rojo: #dc2626;
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
@@ -113,16 +126,29 @@
     --input: transparent;
     --ring: oklch(0.556 0 0);
     --chart-1: oklch(0.87 0 0);
-    --series-1: #3987e5; /* paso oscuro del mismo tono, validado sobre #171717 */
-    --tipo-factura: #2b6fd0;
-    --tipo-boleta: #f4b27a;
-    --tipo-nc: #8e4fc0;
-    --tipo-nd: #7fdccf;
-    --estado-ok: #1f8a5a;
-    --estado-aviso: #f0c95a;
-    --estado-proceso: #2b6fd0;
-    --estado-mal: #c7362e;
-    --estado-anulado: #c4c4c4;
+    --series-1: #60a5fa;
+    --series-2: #e879f9;
+    --series-3: #fb923c;
+    --tipo-factura: #3b82f6;
+    --tipo-boleta: #fdba74;
+    --tipo-nc: #a855f7;
+    --tipo-nd: #5eead4;
+    --estado-ok: #16a34a;
+    --estado-aviso: #facc15;
+    --estado-proceso: #3b82f6;
+    --estado-mal: #ef4444;
+    --estado-anulado: #cbd5e1;
+    --ic-azul: #60a5fa;
+    --ic-cielo: #38bdf8;
+    --ic-violeta: #a78bfa;
+    --ic-fucsia: #e879f9;
+    --ic-rosa: #fb7185;
+    --ic-naranja: #fb923c;
+    --ic-ambar: #fbbf24;
+    --ic-verde: #4ade80;
+    --ic-esmeralda: #34d399;
+    --ic-teal: #2dd4bf;
+    --ic-rojo: #f87171;
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
@@ -173,3 +199,18 @@
 /* Modales: si la pantalla es muy baja el contenido se desplaza sin barra visible. */
 [data-slot="dialog-content"], [data-slot="alert-dialog-content"] { scrollbar-width: none; }
 [data-slot="dialog-content"]::-webkit-scrollbar, [data-slot="alert-dialog-content"]::-webkit-scrollbar { display: none; }
+
+/* iconos-colores: cada ícono tiene su color en todo el sistema. Flechas de menú, X y puntos quedan neutros. */
+svg.lucide-file-text, svg.lucide-download, svg.lucide-house, svg.lucide-monitor, svg.lucide-save, svg.lucide-id-card { color: var(--ic-azul); }
+svg.lucide-info, svg.lucide-truck, svg.lucide-send, svg.lucide-cloud-check, svg.lucide-upload, svg.lucide-user-plus, svg.lucide-eye { color: var(--ic-cielo); }
+svg.lucide-database, svg.lucide-file-code, svg.lucide-receipt-text, svg.lucide-settings, svg.lucide-shield, svg.lucide-landmark, svg.lucide-scroll-text, svg.lucide-calendar-clock { color: var(--ic-violeta); }
+svg.lucide-users-round, svg.lucide-users, svg.lucide-chart-column, svg.lucide-image, svg.lucide-file-plus, svg.lucide-store { color: var(--ic-fucsia); }
+svg.lucide-shopping-cart, svg.lucide-trash-2, svg.lucide-user-minus, svg.lucide-file-minus { color: var(--ic-rosa); }
+svg.lucide-package, svg.lucide-package-plus, svg.lucide-boxes, svg.lucide-shopping-basket, svg.lucide-key-round, svg.lucide-plug-zap, svg.lucide-pencil { color: var(--ic-naranja); }
+svg.lucide-triangle-alert, svg.lucide-shield-alert, svg.lucide-clock, svg.lucide-sun, svg.lucide-hand-coins, svg.lucide-file-key-2, svg.lucide-moon, svg.lucide-lock, svg.lucide-history { color: var(--ic-ambar); }
+svg.lucide-plus, svg.lucide-check, svg.lucide-circle-check, svg.lucide-badge-check, svg.lucide-shield-check, svg.lucide-calendar-check, svg.lucide-banknote, svg.lucide-circle-arrow-up, svg.lucide-arrow-up-right { color: var(--ic-verde); }
+svg.lucide-file-check-corner, svg.lucide-file-check-2, svg.lucide-file-spreadsheet, svg.lucide-wallet, svg.lucide-vault, svg.lucide-printer, svg.lucide-archive-restore { color: var(--ic-esmeralda); }
+svg.lucide-rotate-cw, svg.lucide-refresh-cw, svg.lucide-arrow-right-left, svg.lucide-undo-2, svg.lucide-file-archive, svg.lucide-building-2, svg.lucide-clipboard-list, svg.lucide-search { color: var(--ic-teal); }
+svg.lucide-ban, svg.lucide-circle-x, svg.lucide-circle-alert, svg.lucide-octagon-x, svg.lucide-circle-arrow-down, svg.lucide-log-out, svg.lucide-arrow-down-right, svg.lucide-cloud-off, svg.lucide-image-off, svg.lucide-eye-off { color: var(--ic-rojo); }
+/* Sobre un botón relleno o el logo el ícono usa el color del texto para que se lea. */
+[data-slot="button"][data-variant="default"] svg.lucide, [data-slot="button"][data-variant="destructive"] svg.lucide, .bg-primary svg.lucide { color: inherit; }

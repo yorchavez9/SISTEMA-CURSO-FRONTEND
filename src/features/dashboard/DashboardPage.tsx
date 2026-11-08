@@ -1,7 +1,7 @@
 import { Link } from "react-router"
 import { useQuery } from "@tanstack/react-query"
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts"
-import { AlertTriangleIcon, ArrowDownRightIcon, ArrowUpRightIcon, CircleAlertIcon, MinusIcon, PlusIcon } from "lucide-react"
+import { AlertTriangleIcon, ArrowDownRightIcon, ArrowUpRightIcon, BanknoteIcon, ChartColumnIcon, CircleAlertIcon, HandCoinsIcon, type LucideIcon, MinusIcon, PlusIcon, ReceiptTextIcon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,7 +31,8 @@ interface Dashboard {
 const TIPO: Record<string, string> = { "01": "Facturas", "03": "Boletas", "07": "Notas de crédito", "08": "Notas de débito" }
 // Una sola serie por gráfico: un tono validado (contraste ≥3:1 en claro y oscuro), sin leyenda; el título la nombra.
 const serie: ChartConfig = { total: { label: "Venta neta", color: "var(--series-1)" } }
-const serieOnda: ChartConfig = { comprobantes: { label: "Comprobantes", color: "var(--series-1)" } }
+const serieProductos: ChartConfig = { total: { label: "Importe", color: "var(--series-3)" } }
+const serieOnda: ChartConfig = { comprobantes: { label: "Comprobantes", color: "var(--series-2)" } }
 // Cada tipo y cada estado conservan siempre su color; el orden evita vecinos confundibles con daltonismo.
 const COLOR_TIPO: Record<string, string> = { "01": "var(--tipo-factura)", "03": "var(--tipo-boleta)", "07": "var(--tipo-nc)", "08": "var(--tipo-nd)" }
 const GRUPOS_ESTADO = [
@@ -77,17 +78,17 @@ export function DashboardPage() {
       ))}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Ventas de hoy" valor={d && soles(d.kpis.ventas_hoy)} />
-        <Kpi label="Ventas del mes" valor={d && soles(d.kpis.ventas_mes)}
+        <Kpi icono={BanknoteIcon} label="Ventas de hoy" valor={d && soles(d.kpis.ventas_hoy)} />
+        <Kpi icono={ChartColumnIcon} label="Ventas del mes" valor={d && soles(d.kpis.ventas_mes)}
           extra={delta !== null && (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               {delta > 0.05 ? <ArrowUpRightIcon className="size-3.5" /> : delta < -0.05 ? <ArrowDownRightIcon className="size-3.5" /> : <MinusIcon className="size-3.5" />}
               {`${delta > 0 ? "+" : ""}${delta.toFixed(1)}% vs. mismo periodo del mes anterior`}
             </span>
           )} />
-        <Kpi label="Comprobantes del mes" valor={d && String(d.kpis.comprobantes_mes)}
+        <Kpi icono={ReceiptTextIcon} label="Comprobantes del mes" valor={d && String(d.kpis.comprobantes_mes)}
           extra={d && <span className="text-xs text-muted-foreground">{d.por_tipo.filter((t) => t.cantidad).map((t) => `${t.cantidad} ${TIPO[t.tipo].toLowerCase()}`).join(" · ") || "—"}</span>} />
-        <Kpi label="Por cobrar" valor={d && soles(d.kpis.por_cobrar)}
+        <Kpi icono={HandCoinsIcon} label="Por cobrar" valor={d && soles(d.kpis.por_cobrar)}
           extra={d && d.kpis.saldos_a_favor > 0 && <Link to="/cuentas-por-cobrar" className="text-xs underline underline-offset-4">{soles(d.kpis.saldos_a_favor)} a favor de clientes</Link>} />
       </div>
 
@@ -168,7 +169,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             {!d ? <Skeleton className="h-56" /> : d.top_productos.length === 0 ? <p className="text-sm text-muted-foreground">Sin ventas este mes.</p> : (
-              <ChartContainer config={serie} className="w-full" style={{ height: Math.max(120, d.top_productos.length * 36) }}>
+              <ChartContainer config={serieProductos} className="w-full" style={{ height: Math.max(120, d.top_productos.length * 36) }}>
                 <BarChart data={d.top_productos} layout="vertical" margin={{ left: 0, right: 56 }} barCategoryGap={6}>
                   <XAxis type="number" hide />
                   <YAxis type="category" dataKey="descripcion" tickLine={false} axisLine={false} width={150}
@@ -265,11 +266,11 @@ function Dona({ datos }: { datos: { nombre: string; valor: number; color: string
   )
 }
 
-function Kpi({ label, valor, extra }: { label: string; valor?: string | false; extra?: React.ReactNode }) {
+function Kpi({ icono: Icono, label, valor, extra }: { icono: LucideIcon; label: string; valor?: string | false; extra?: React.ReactNode }) {
   return (
     <Card>
       <CardHeader>
-        <CardDescription>{label}</CardDescription>
+        <CardDescription className="flex items-center gap-2"><Icono className="size-4" /> {label}</CardDescription>
         <CardTitle className="tabular-nums text-2xl">{valor ?? <Skeleton className="h-8 w-32" />}</CardTitle>
         {extra}
       </CardHeader>
