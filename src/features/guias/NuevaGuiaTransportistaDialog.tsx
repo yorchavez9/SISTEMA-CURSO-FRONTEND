@@ -1,4 +1,5 @@
 import { useRef, useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { PlusIcon, SearchIcon, Trash2Icon, TruckIcon } from "lucide-react"
@@ -43,6 +44,8 @@ export function NuevaGuiaTransportistaDialog({ onClose, onCreada }: { onClose: (
   const [errores, setErrores] = useState<Record<string, string[]>>({})
   const [buscando, setBuscando] = useState("")
   const idem = useRef(uid())
+  const condPag = usePaginaLocal(conductores, 2, 1)
+  const itemsPag = usePaginaLocal(items, 4, 2)
 
   const series = op.data?.series_transportista ?? []
   const serie = series.find((s) => String(s.id) === serieId) ?? series.find((s) => s.predeterminada) ?? series[0]
@@ -90,20 +93,20 @@ export function NuevaGuiaTransportistaDialog({ onClose, onCreada }: { onClose: (
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-4xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader><DialogTitle>Guía de transportista</DialogTitle><DialogDescription>Para quien presta el servicio de transporte.</DialogDescription></DialogHeader>
         {op.isLoading ? <Skeleton className="h-64" /> : series.length === 0 ? (
           <Alert variant="destructive"><AlertTitle>No hay series de transportista</AlertTitle><AlertDescription>Crea una serie con prefijo V en Configuración → Locales y series.</AlertDescription></Alert>
         ) : (
           <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <SeccionesModal secciones={[
+{ id: "datos", label: "Datos", contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-3">
               <Field><FieldLabel>Serie</FieldLabel><Select value={String(serie?.id ?? "")} onValueChange={setSerieId}><SelectTrigger aria-label="Serie"><SelectValue /></SelectTrigger><SelectContent>{series.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.serie}</SelectItem>)}</SelectContent></Select></Field>
               <Field><FieldLabel>Motivo</FieldLabel><Select value={motivo} onValueChange={setMotivo}><SelectTrigger aria-label="Motivo"><SelectValue /></SelectTrigger><SelectContent>{op.data?.motivos.map((m) => <SelectItem key={m.codigo} value={m.codigo}>{m.label}</SelectItem>)}</SelectContent></Select></Field>
               <Field data-invalid={inv("fecha_traslado")}><FieldLabel htmlFor="grt-fecha">Fecha de traslado</FieldLabel><Input id="grt-fecha" type="date" min={hoy()} value={fecha} onChange={(e) => setFecha(e.target.value)} /><FieldError errors={err("fecha_traslado")} /></Field>
             </div>
-            {Parte({ titulo: "Remitente", v: remitente, set: setRemitente, pref: "remitente", q: "r" })}
-            {Parte({ titulo: "Destinatario", v: destinatario, set: setDestinatario, pref: "destinatario", q: "d" })}
-            <FieldSet>
+<FieldSet>
               <FieldLegend variant="label">Documento relacionado</FieldLegend>
               <div className="grid gap-3 sm:grid-cols-[12rem_1fr]">
                 <Select value={doc.tipo_codigo} onValueChange={(t) => setDoc({ ...doc, tipo_codigo: t })}><SelectTrigger aria-label="Tipo de documento relacionado"><SelectValue /></SelectTrigger><SelectContent>{DOCS_RELACIONADOS.map((d) => <SelectItem key={d.c} value={d.c}>{d.l}</SelectItem>)}</SelectContent></Select>
@@ -111,7 +114,13 @@ export function NuevaGuiaTransportistaDialog({ onClose, onCreada }: { onClose: (
               </div>
               <FieldError errors={err("doc_relacionado.numero")} />
             </FieldSet>
-            <div className="grid gap-4 sm:grid-cols-2">
+</div>) },
+{ id: "partes", label: "Partes", contenido: (<div className="flex flex-col gap-5">
+            {Parte({ titulo: "Remitente", v: remitente, set: setRemitente, pref: "remitente", q: "r" })}
+            {Parte({ titulo: "Destinatario", v: destinatario, set: setDestinatario, pref: "destinatario", q: "d" })}
+            </div>) },
+{ id: "ruta", label: "Ruta", contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-2">
               {([["Punto de partida", partida, setPartida, "partida"], ["Punto de llegada", llegada, setLlegada, "llegada"]] as const).map(([t, v, set, k]) => (
                 <FieldSet key={k}>
                   <FieldLegend variant="label">{t}</FieldLegend>
@@ -123,16 +132,21 @@ export function NuevaGuiaTransportistaDialog({ onClose, onCreada }: { onClose: (
                 </FieldSet>
               ))}
             </div>
-            <div className="grid gap-4 sm:grid-cols-4">
+            </div>) },
+{ id: "vehiculo", label: "Vehículo", contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-4">
               <Field data-invalid={inv("peso_total")}><FieldLabel htmlFor="grt-peso">Peso (kg)</FieldLabel><Input id="grt-peso" className="text-right tabular-nums" inputMode="decimal" value={peso} onChange={(e) => setPeso(e.target.value)} /><FieldError errors={err("peso_total")} /></Field>
               <Field><FieldLabel htmlFor="grt-bultos">Bultos</FieldLabel><Input id="grt-bultos" className="text-right tabular-nums" inputMode="numeric" value={bultos} onChange={(e) => setBultos(e.target.value)} /></Field>
               <Field data-invalid={inv("vehiculo.placa")}><FieldLabel htmlFor="grt-placa">Placa</FieldLabel><Input id="grt-placa" className="uppercase" value={vehiculo.placa} onChange={(e) => setVehiculo({ ...vehiculo, placa: e.target.value.trim() })} /><FieldError errors={err("vehiculo.placa")} /></Field>
               <Field><FieldLabel htmlFor="grt-tuce">N.° circulación</FieldLabel><Input id="grt-tuce" className="uppercase" value={vehiculo.nro_circulacion} onChange={(e) => setVehiculo({ ...vehiculo, nro_circulacion: e.target.value.trim() })} /></Field>
             </div>
+</div>) },
+{ id: "conductores", label: "Conductores", contenido: (<div className="flex flex-col gap-5">
             <FieldSet>
               <FieldLegend variant="label">Conductores</FieldLegend>
               <div className="flex flex-col gap-2">
-                {conductores.map((c, i) => {
+                {condPag.visibles.map((c, k) => {
+                  const i = condPag.offset + k
                   const set = (k: string, v: string) => setConductores(conductores.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
                   return (
                     <div key={c.key} className="grid gap-2 sm:grid-cols-[8rem_1fr_1fr_8rem_auto]">
@@ -144,13 +158,17 @@ export function NuevaGuiaTransportistaDialog({ onClose, onCreada }: { onClose: (
                     </div>
                   )
                 })}
-                <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => setConductores([...conductores, conductorVacio()])}><PlusIcon /> Agregar</Button>
+                <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => { setConductores([...conductores, conductorVacio()]); condPag.irAlFinal() }}><PlusIcon /> Agregar</Button>
+                {condPag.pager}
               </div>
             </FieldSet>
-            <FieldSet>
+            </div>) },
+{ id: "bienes", label: "Bienes", contenido: (<div className="flex flex-col gap-5">
+<FieldSet>
               <FieldLegend variant="label">Bienes transportados</FieldLegend>
               <div className="flex flex-col gap-2">
-                {items.map((it, i) => {
+                {itemsPag.visibles.map((it, k) => {
+                  const i = itemsPag.offset + k
                   const set = (k: string, v: string) => setItems(items.map((x, j) => (j === i ? { ...x, [k]: v } : x)))
                   return (
                     <div key={it.key} className="grid gap-2 sm:grid-cols-[1fr_12rem_7rem_auto]">
@@ -161,10 +179,13 @@ export function NuevaGuiaTransportistaDialog({ onClose, onCreada }: { onClose: (
                     </div>
                   )
                 })}
-                <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => setItems([...items, itemVacio()])}><PlusIcon /> Agregar</Button>
+                <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => { setItems([...items, itemVacio()]); itemsPag.irAlFinal() }}><PlusIcon /> Agregar</Button>
+                {itemsPag.pager}
               </div>
             </FieldSet>
-          </FieldGroup>
+          </div>) },
+]} />
+</FieldGroup>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>

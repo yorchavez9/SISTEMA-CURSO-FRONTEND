@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { SeccionesModal } from "@/components/shared/SeccionesModal"
 import { Link } from "react-router"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -156,14 +157,16 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Cobranza {d?.comprobante ?? ""}</DialogTitle>
           <DialogDescription>{d?.cliente}</DialogDescription>
         </DialogHeader>
         {!d ? <Skeleton className="h-40" /> : (
           <div className="flex flex-col gap-4 text-sm">
-            <div className="grid grid-cols-3 gap-2 text-center">
+            <SeccionesModal secciones={[
+{ id: "resumen", label: "Resumen", contenido: (<div className="flex flex-col gap-5">
+<div className="grid grid-cols-3 gap-2 text-center">
               <div><div className="text-muted-foreground">Total</div><div className="tabular-nums">{soles(d.total)}</div></div>
               <div><div className="text-muted-foreground">Pagado</div><div className="tabular-nums">{soles(d.pagado)}</div></div>
               <div><div className="text-muted-foreground">Saldo</div><div className="tabular-nums font-semibold">{soles(d.saldo)}</div></div>
@@ -191,7 +194,9 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
                 <Alert><CircleAlertIcon /><AlertTitle>Abre tu caja para registrar cobros.</AlertTitle><AlertDescription><Link className="underline" to="/caja">Ir a Caja</Link></AlertDescription></Alert>
               )
             )}
-            {d.pagos.length > 0 && (
+            </div>) },
+{ id: "pagos", label: "Pagos", oculta: d.pagos.length === 0, contenido: (<div className="flex flex-col gap-5">
+{d.pagos.length > 0 && (
               <>
                 <Separator />
                 <h3 className="font-medium">Pagos</h3>
@@ -213,7 +218,9 @@ export function CobroDialog({ ventaId, onClose }: { ventaId: number; onClose: ()
                 </Table>
               </>
             )}
-            {anular && (
+            </div>) },
+]} />
+{anular && (
               <div className="flex gap-2">
                 <Input placeholder="Motivo de la anulación" value={motivo} onChange={(e) => setMotivo(e.target.value)} autoFocus />
                 <Button variant="destructive" disabled={motivo.trim().length < 5 || anularM.isPending} onClick={() => anularM.mutate()}>Anular</Button>

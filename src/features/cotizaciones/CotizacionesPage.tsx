@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { Link, useNavigate, useSearchParams } from "react-router"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -108,18 +109,21 @@ function DetalleCotizacion({ id, onClose }: { id: number | null; onClose: () => 
     onError: (e) => toast.error(errorMsg(e)),
   })
   const c = q.data
+  const itemsPag = usePaginaLocal(c?.items ?? [], 5, 2)
   const gestiona = puede("cotizaciones.gestionar")
 
   return (
     <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-2xl">
         <DialogHeader className="p-4 pr-12">
           <DialogTitle className="tabular-nums">{c?.codigo ?? "Cotización"}</DialogTitle>
           <DialogDescription>{c ? `Emitida el ${fecha(c.fecha_emision)} · válida hasta el ${fecha(c.fecha_validez)}` : "Cargando…"}</DialogDescription>
         </DialogHeader>
         {!c ? <div className="px-4"><Skeleton className="h-64" /></div> : (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
+            <SeccionesModal secciones={[
+{ id: "resumen", label: "Resumen", contenido: (<div className="flex flex-col gap-5">
+<div className="flex flex-wrap items-center gap-2">
               <EstadoCotizacionBadge estado={c.estado} />
               {c.venta?.numero && <Button variant="link" className="h-auto p-0 tabular-nums" asChild><Link to={`/comprobantes?ver=${c.venta.comprobante_id}`}>{c.venta.numero}</Link></Button>}
             </div>
@@ -140,12 +144,14 @@ function DetalleCotizacion({ id, onClose }: { id: number | null; onClose: () => 
               {c.cliente.num_doc && <p className="tabular-nums text-muted-foreground">{c.cliente.num_doc}</p>}
               {c.cliente.email && <p className="text-muted-foreground">{c.cliente.email}</p>}
             </section>
-            <Table>
+            </div>) },
+{ id: "items", label: "Ítems", contenido: (<div className="flex flex-col gap-5">
+<Table>
               <TableHeader>
                 <TableRow><TableHead>Descripción</TableHead><TableHead className="text-right">Cant.</TableHead><TableHead className="text-right">P. unit.</TableHead><TableHead className="text-right">Total</TableHead></TableRow>
               </TableHeader>
               <TableBody>
-                {c.items.map((i, n) => (
+                {itemsPag.visibles.map((i, n) => (
                   <TableRow key={n}>
                     <TableCell>{i.descripcion}{i.descuento > 0 && <div className="text-xs text-muted-foreground">Descuento {soles(i.descuento, c.moneda)}</div>}</TableCell>
                     <TableCell className="text-right tabular-nums">{i.cantidad} {i.unidad}</TableCell>
@@ -162,10 +168,13 @@ function DetalleCotizacion({ id, onClose }: { id: number | null; onClose: () => 
                 <TableRow><TableCell colSpan={3} className="text-right font-medium">Total</TableCell><TableCell className="text-right tabular-nums font-medium">{soles(c.totales.total, c.moneda)}</TableCell></TableRow>
               </TableFooter>
             </Table>
+            {itemsPag.pager}
             {c.observacion && <section><h3 className="mb-1 font-medium">Observaciones</h3><p className="whitespace-pre-line text-muted-foreground">{c.observacion}</p></section>}
             <Separator />
             <p className="text-xs text-muted-foreground">Registrada por {c.usuario ?? "—"}. Una cotización no es un comprobante de pago.</p>
-          </div>
+          </div>) },
+]} />
+</div>
         )}
       </DialogContent>
     </Dialog>

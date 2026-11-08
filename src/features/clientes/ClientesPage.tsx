@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { SeccionesModal } from "@/components/shared/SeccionesModal"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -236,7 +237,9 @@ export function ClienteDialog({ cliente, onClose, onSaved }: { cliente: ClienteD
         </DialogHeader>
         <form id="form-cliente" onSubmit={onSubmit} noValidate>
           <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-[11rem_1fr]">
+            <SeccionesModal secciones={[
+{ id: "documento", label: "Documento", error: !!(errors.numero_documento || errors.razon_social), contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-[11rem_1fr]">
               <Field>
                 <FieldLabel>Tipo de documento</FieldLabel>
                 <Controller control={form.control} name="tipo_documento" render={({ field }) => (
@@ -271,7 +274,9 @@ export function ClienteDialog({ cliente, onClose, onSaved }: { cliente: ClienteD
               <Input id="c-dir" {...form.register("direccion")} />
               {tipo === "6" && <FieldDescription>Se imprime en la factura.</FieldDescription>}
             </Field>
-            <div className="grid gap-4 sm:grid-cols-2">
+            </div>) },
+{ id: "contacto", label: "Contacto", error: !!(errors.email || errors.dias_credito), contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-2">
               <Field data-invalid={!!errors.email}>
                 <FieldLabel htmlFor="c-mail">Correo</FieldLabel>
                 <Input id="c-mail" type="email" aria-invalid={!!errors.email} {...form.register("email")} />
@@ -287,7 +292,9 @@ export function ClienteDialog({ cliente, onClose, onSaved }: { cliente: ClienteD
               <Input id="c-dias" inputMode="numeric" aria-invalid={!!errors.dias_credito} {...form.register("dias_credito")} />
               <FieldError errors={[errors.dias_credito]} />
             </Field>
-          </FieldGroup>
+          </div>) },
+]} />
+</FieldGroup>
         </form>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>

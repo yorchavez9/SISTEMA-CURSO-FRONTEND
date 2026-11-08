@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { Link, useSearchParams } from "react-router"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -226,10 +227,13 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
     refetchInterval: (q) => (q.state.data && PENDIENTES.includes(q.state.data.estado) ? 3000 : false),
   })
   const c = d.data
+  const itemsPag = usePaginaLocal(c?.items ?? [], 6, 3)
+  const histPag = usePaginaLocal(c?.historial ?? [], 5, 4)
+  const apiPag = usePaginaLocal(c?.solicitudes ?? [], 5, 3)
 
   return (
     <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-2xl">
         <DialogHeader className="p-4 pr-12">
           <DialogTitle className="tabular-nums">{c?.numero ?? "Comprobante"}</DialogTitle>
           <DialogDescription>{c ? `${TIPO[c.tipo_documento]} · ${c.fecha_emision}` : "Cargando…"}</DialogDescription>
@@ -238,7 +242,9 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
         {d.isError && <Alert variant="destructive" className="m-4"><AlertDescription>{toApiError(d.error).message}</AlertDescription></Alert>}
         {c && (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
+            <SeccionesModal secciones={[
+{ id: "resumen", label: "Resumen", contenido: (<div className="flex flex-col gap-5">
+<div className="flex flex-wrap items-center gap-2">
               <EstadoBadge estado={c.estado} />
               {c.sunat_codigo && <Badge variant="outline">SUNAT {c.sunat_codigo}</Badge>}
               {c.forma_pago === "credito" && <Badge variant="secondary">Crédito</Badge>}
@@ -316,7 +322,7 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
               <section>
                 <h3 className="mb-1 font-medium">Bajas</h3>
                 {c.bajas.map((b) => (
-                  <div key={b.id} className="flex flex-col gap-1 rounded-md border p-2">
+                  <div key={b.id} className="flex flex-col gap-1 rounded-md bg-foreground/5 p-2">
                     <div className="flex items-center justify-between gap-2"><span className="tabular-nums">{b.identifier ?? b.tipo}</span><EstadoBaja estado={b.estado} /></div>
                     <span className="text-xs text-muted-foreground">{b.motivo}{(b.ultimo_error || b.sunat_descripcion) && ` · ${b.ultimo_error ?? `${b.sunat_codigo} ${b.sunat_descripcion}`}`}</span>
                   </div>
@@ -333,11 +339,13 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
               <p className="tabular-nums text-xs text-muted-foreground">{c.cliente.tipo_doc === "6" ? "RUC" : "Doc."} {c.cliente.num_doc}{c.cliente_direccion ? ` · ${c.cliente_direccion}` : ""}</p>
             </section>
 
-            <section>
+            </div>) },
+{ id: "items", label: "Ítems", contenido: (<div className="flex flex-col gap-5">
+<section>
               <h3 className="mb-1 font-medium">Ítems</h3>
               <Table>
                 <TableBody>
-                  {c.items.map((it, i) => (
+                  {itemsPag.visibles.map((it, i) => (
                     <TableRow key={i}>
                       <TableCell>
                         {it.descripcion}
@@ -348,6 +356,7 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
                   ))}
                 </TableBody>
               </Table>
+              {itemsPag.pager}
             </section>
 
             <section className="flex flex-col gap-1">
@@ -366,27 +375,32 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
               </section>
             )}
 
-            <Separator />
+            </div>) },
+{ id: "historial", label: "Historial", contenido: (<div className="flex flex-col gap-5">
+<Separator />
             <section>
               <h3 className="mb-2 font-medium">Historial</h3>
-              <ol className="flex flex-col gap-2 border-l pl-4">
-                {c.historial.map((h, i) => (
+              <ol className="flex flex-col gap-3">
+                {histPag.visibles.map((h, i) => (
                   <li key={i}>
                     <div className="flex items-center gap-2"><EstadoBadge estado={h.a as Estado} /><span className="text-xs text-muted-foreground">{new Date(h.fecha).toLocaleString("es-PE")}</span></div>
                     {h.detalle && <p className="mt-1 text-xs text-muted-foreground">{h.detalle}</p>}
                   </li>
                 ))}
               </ol>
+              {histPag.pager}
             </section>
 
-            <section>
+            </div>) },
+{ id: "api", label: "API", contenido: (<div className="flex flex-col gap-5">
+<section>
               <h3 className="mb-2 font-medium">Llamadas a la API ({c.intentos} {c.intentos === 1 ? "envío" : "envíos"})</h3>
               <Table>
                 <TableHeader>
                   <TableRow><TableHead>Operación</TableHead><TableHead>HTTP</TableHead><TableHead className="text-right">ms</TableHead></TableRow>
                 </TableHeader>
                 <TableBody>
-                  {c.solicitudes.map((s, i) => (
+                  {apiPag.visibles.map((s, i) => (
                     <TableRow key={i}>
                       <TableCell>
                         <span className="tabular-nums text-xs">{s.metodo} {s.endpoint}</span>
@@ -398,9 +412,12 @@ function DetalleDialog({ id, onClose, onReintentar, onVer }: { id: number | null
                   ))}
                 </TableBody>
               </Table>
+              {apiPag.pager}
               {c.hash_cpe && <p className="mt-2 break-all tabular-nums text-xs text-muted-foreground">Hash CPE: {c.hash_cpe}</p>}
             </section>
-          </div>
+          </div>) },
+]} />
+</div>
         )}
       </DialogContent>
       {baja && c && (

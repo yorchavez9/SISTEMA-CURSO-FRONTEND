@@ -27,7 +27,7 @@ export function InicioPage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {pasos.map((p) => (
-            <div key={p.to} className="flex items-center gap-3 rounded-lg border p-3">
+            <div key={p.to} className="flex items-center gap-3 rounded-lg bg-foreground/5 p-3">
               {p.ok ? <CheckCircle2Icon className="size-5 text-primary" /> : <CircleDashedIcon className="size-5 text-muted-foreground" />}
               <span className={p.ok ? "text-muted-foreground line-through" : "font-medium"}>{p.titulo}</span>
               {!p.ok && (

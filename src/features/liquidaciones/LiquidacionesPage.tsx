@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { BanIcon, CheckCircle2Icon, ClockIcon, FileArchiveIcon, FileCodeIcon, FileTextIcon, PlusIcon, ReceiptIcon, RotateCwIcon, SearchIcon, ShoppingBasketIcon, Trash2Icon, XCircleIcon } from "lucide-react"
@@ -173,6 +174,7 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
   const [errores, setErrores] = useState<Record<string, string[]>>({})
   const [buscando, setBuscando] = useState(false)
   const idem = useRef(uid())
+  const itemsPag = usePaginaLocal(items, 3, 1)
   const unidades = cat.data?.catalogos["03"] ?? []
 
   const serie = op.data?.series.find((s) => String(s.id) === serieId) ?? op.data?.series.find((s) => s.predeterminada) ?? op.data?.series[0]
@@ -205,13 +207,15 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-4xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader><DialogTitle>Nueva liquidación de compra</DialogTitle><DialogDescription>Compra a una persona sin RUC.</DialogDescription></DialogHeader>
         {op.isLoading ? <Skeleton className="h-64" /> : op.data?.series.length === 0 ? (
           <Alert variant="destructive"><AlertTitle>No hay series de liquidación</AlertTitle><AlertDescription>Crea una serie con prefijo L en Configuración → Locales y series.</AlertDescription></Alert>
         ) : op.data && (
           <FieldGroup>
-            <div className="flex flex-wrap items-end gap-6">
+            <SeccionesModal secciones={[
+{ id: "vendedor", label: "Vendedor", contenido: (<div className="flex flex-col gap-5">
+<div className="flex flex-wrap items-end gap-6">
               <Field className="w-40">
                 <FieldLabel>Serie</FieldLabel>
                 <Select value={String(serie?.id ?? "")} onValueChange={setSerieId}><SelectTrigger aria-label="Serie"><SelectValue /></SelectTrigger><SelectContent>{op.data.series.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.serie}</SelectItem>)}</SelectContent></Select>
@@ -234,6 +238,8 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
               </div>
               <FieldError errors={[...err("vendedor.tipo_doc"), ...err("vendedor.num_doc"), ...err("vendedor.nombre"), ...err("vendedor.direccion"), ...err("vendedor.ubigeo")]} />
             </FieldSet>
+</div>) },
+{ id: "lugar", label: "Lugar", contenido: (<div className="flex flex-col gap-5">
             <FieldSet>
               <FieldLegend variant="label">Lugar de la operación</FieldLegend>
               <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
@@ -242,12 +248,14 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
               </div>
               <FieldError errors={[...err("lugar.direccion"), ...err("lugar.ubigeo")]} />
             </FieldSet>
-            <FieldSet>
+            </div>) },
+{ id: "bienes", label: "Bienes", contenido: (<div className="flex flex-col gap-5">
+<FieldSet>
               <FieldLegend variant="label">Bienes comprados</FieldLegend>
               <Table>
                 <TableHeader><TableRow><TableHead>Descripción</TableHead><TableHead className="w-44">Unidad</TableHead><TableHead className="w-24 text-right">Cantidad</TableHead><TableHead className="w-28 text-right">Valor unit.</TableHead><TableHead className="w-32">IGV</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
                 <TableBody>
-                  {items.map((it, i) => (
+                  {itemsPag.visibles.map((it, k) => { const i = itemsPag.offset + k; return (
                     <TableRow key={it.key}>
                       <TableCell><Input aria-label="Descripción" value={it.descripcion} aria-invalid={!!errores[`items.${i}.descripcion`]} onChange={(e) => setItem(i, "descripcion", e.target.value)} /></TableCell>
                       <TableCell><Select value={it.unidad} onValueChange={(u) => setItem(i, "unidad", u)}><SelectTrigger aria-label="Unidad"><SelectValue /></SelectTrigger><SelectContent>{unidades.map((u) => <SelectItem key={u.codigo} value={u.codigo}>{u.codigo} · {u.descripcion}</SelectItem>)}</SelectContent></Select></TableCell>
@@ -256,19 +264,22 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
                       <TableCell><Select value={it.tip_afe_igv} onValueChange={(a) => setItem(i, "tip_afe_igv", a)}><SelectTrigger aria-label="Afectación"><SelectValue /></SelectTrigger><SelectContent>{AFECTACIONES.map((a) => <SelectItem key={a.c} value={a.c}>{a.l}</SelectItem>)}</SelectContent></Select></TableCell>
                       <TableCell>{items.length > 1 && <Button variant="destructive" size="icon" aria-label="Quitar" onClick={() => setItems(items.filter((_, j) => j !== i))}><Trash2Icon /></Button>}</TableCell>
                     </TableRow>
-                  ))}
+                  ) })}
                 </TableBody>
               </Table>
+              {itemsPag.pager}
               <FieldError errors={Object.keys(errores).filter((k) => k.startsWith("items")).slice(0, 1).flatMap(err)} />
-              <div className="flex items-start justify-between gap-4">
-                <Button type="button" variant="outline" size="sm" onClick={() => setItems([...items, itemVacio()])}><PlusIcon /> Agregar</Button>
-                <div className="flex w-64 flex-col gap-1 rounded-lg bg-muted/40 p-3 text-sm">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => { setItems([...items, itemVacio()]); itemsPag.irAlFinal() }}><PlusIcon /> Agregar</Button>
+                <div className="flex w-full flex-col gap-1 rounded-lg bg-muted/40 p-3 text-sm sm:w-64">
                   <div className="flex justify-between"><span className="text-muted-foreground">Valor de compra</span><span className="tabular-nums">{soles(r2(tot.valor))}</span></div>
                   <div className="flex justify-between"><span className="text-muted-foreground">IGV a retener</span><span className="tabular-nums">{soles(r2(tot.igv))}</span></div>
                 </div>
               </div>
             </FieldSet>
-          </FieldGroup>
+          </div>) },
+]} />
+</FieldGroup>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
@@ -293,6 +304,8 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
     refetchInterval: (q) => (q.state.data && (PENDIENTES.includes(q.state.data.estado) || q.state.data.reversion?.estado === "enviado") ? 3000 : false),
   })
   const l = d.data
+  const bienesPag = usePaginaLocal(l?.items ?? [], 5, 2)
+  const histPag = usePaginaLocal(l?.historial ?? [], 6, 5)
   const conApi = !!l?.tiene_archivos
   const pagos = useQuery({ queryKey: ["liquidacion-pagos", id], enabled: id !== null && conApi, queryFn: async () => (await api.get<{ data: Pagos }>(`/liquidaciones/${id}/pagos`)).data.data })
   const op = useQuery({ queryKey: ["liquidaciones-opciones"], enabled: rev, queryFn: async () => (await api.get<{ data: Opciones }>("/liquidaciones/opciones")).data.data })
@@ -306,12 +319,14 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
 
   return (
     <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-3xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-3xl">
         <DialogHeader className="p-4 pr-12"><DialogTitle className="tabular-nums">{l?.numero ?? "Liquidación"}</DialogTitle><DialogDescription>{l ? l.fecha_emision : "Cargando…"}</DialogDescription></DialogHeader>
         {d.isLoading && <div className="p-4"><Skeleton className="h-64" /></div>}
         {l && (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
-            <div className="flex flex-wrap items-center gap-2"><EstadoBadge estado={l.estado} />{l.sunat_codigo && <Badge variant="outline">SUNAT {l.sunat_codigo}</Badge>}{l.productos_agropecuarios && <Badge variant="outline">Agropecuario</Badge>}</div>
+            <SeccionesModal secciones={[
+{ id: "resumen", label: "Resumen", contenido: (<div className="flex flex-col gap-5">
+<div className="flex flex-wrap items-center gap-2"><EstadoBadge estado={l.estado} />{l.sunat_codigo && <Badge variant="outline">SUNAT {l.sunat_codigo}</Badge>}{l.productos_agropecuarios && <Badge variant="outline">Agropecuario</Badge>}</div>
             {l.sunat_descripcion && <p className="text-muted-foreground">{l.sunat_descripcion}</p>}
             {l.sunat_notas.map((n, i) => <Alert key={i}><AlertDescription>{n}</AlertDescription></Alert>)}
             {l.ultimo_error && <Alert variant="destructive"><XCircleIcon /><AlertDescription>{l.ultimo_error}</AlertDescription></Alert>}
@@ -322,17 +337,22 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
               {puedeEmitir && l.revertible && <Button size="sm" variant="destructive" onClick={() => setRev(true)}><BanIcon /> Revertir</Button>}
             </div>
             <section><h3 className="mb-1 font-medium">Vendedor</h3><p>{l.vendedor.nombre}</p><p className="tabular-nums text-xs text-muted-foreground">{l.vendedor.num_doc} · {l.vendedor_direccion}</p></section>
-            <Table>
+            </div>) },
+{ id: "bienes", label: "Bienes", contenido: (<div className="flex flex-col gap-5">
+<Table>
               <TableHeader><TableRow><TableHead>Bien</TableHead><TableHead className="text-right">Cantidad</TableHead><TableHead className="text-right">Valor unit.</TableHead></TableRow></TableHeader>
-              <TableBody>{l.items.map((it, i) => <TableRow key={i}><TableCell>{it.descripcion}</TableCell><TableCell className="text-right tabular-nums">{it.cantidad} {it.unidad}</TableCell><TableCell className="text-right tabular-nums">{soles(it.valor_unitario)}</TableCell></TableRow>)}</TableBody>
+              <TableBody>{bienesPag.visibles.map((it, i) => <TableRow key={i}><TableCell>{it.descripcion}</TableCell><TableCell className="text-right tabular-nums">{it.cantidad} {it.unidad}</TableCell><TableCell className="text-right tabular-nums">{soles(it.valor_unitario)}</TableCell></TableRow>)}</TableBody>
             </Table>
+            {bienesPag.pager}
             <section className="flex flex-col gap-1">
               <div className="flex justify-between"><span className="text-muted-foreground">Valor de compra</span><span className="tabular-nums">{soles(l.valor_venta)}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">IGV retenido</span><span className="tabular-nums">{soles(l.igv)}</span></div>
               <div className="flex justify-between"><span className="text-muted-foreground">Renta retenida ({l.porcentaje_renta}%)</span><span className="tabular-nums">{soles(l.renta)}</span></div>
               <div className="flex justify-between font-medium"><span>Neto a pagar</span><span className="tabular-nums">{soles(l.neto_a_pagar)}</span></div>
             </section>
-            {conApi && pagos.data && (
+            </div>) },
+{ id: "pagos", label: "Pagos", oculta: !conApi, contenido: (<div className="flex flex-col gap-5">
+{conApi && pagos.data && (
               <section className="flex flex-col gap-2">
                 <h3 className="font-medium">Pagos al vendedor <span className="font-normal text-muted-foreground">· {pagos.data.estado_pago} · {soles(pagos.data.monto_pagado)} de {soles(pagos.data.total_documento)}</span></h3>
                 {pagos.data.pagos.map((p) => (
@@ -351,11 +371,16 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
                 )}
               </section>
             )}
-            <Separator />
-            <ol className="flex flex-col gap-2 border-l pl-4">
-              {l.historial.map((h, i) => <li key={i}><div className="flex items-center gap-2"><EstadoBadge estado={h.estado as Estado} /><span className="text-xs text-muted-foreground">{new Date(h.fecha).toLocaleString("es-PE")}</span></div>{h.detalle && <p className="mt-1 text-xs text-muted-foreground">{h.detalle}</p>}</li>)}
+            </div>) },
+{ id: "historial", label: "Historial", contenido: (<div className="flex flex-col gap-5">
+<Separator />
+            <ol className="flex flex-col gap-3">
+              {histPag.visibles.map((h, i) => <li key={i}><div className="flex items-center gap-2"><EstadoBadge estado={h.estado as Estado} /><span className="text-xs text-muted-foreground">{new Date(h.fecha).toLocaleString("es-PE")}</span></div>{h.detalle && <p className="mt-1 text-xs text-muted-foreground">{h.detalle}</p>}</li>)}
             </ol>
-          </div>
+            {histPag.pager}
+          </div>) },
+]} />
+</div>
         )}
         <Dialog open={rev} onOpenChange={(o) => !o && setRev(false)}>
           <DialogContent>

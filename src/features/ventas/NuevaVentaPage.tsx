@@ -427,7 +427,7 @@ export function NuevaVentaPage() {
                   <FieldDescription>Tu rol no opera caja: la venta quedará pendiente de cobro en Cuentas por cobrar.</FieldDescription>
                 )}
                 {formaPago === "credito" && (
-                  <div className="flex flex-col gap-3 rounded-lg border p-3">
+                  <div className="flex flex-col gap-3 rounded-lg bg-foreground/5 p-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="text-sm font-medium">Cuotas</span>
                       {[1, 2, 3, 6].map((n) => <Button key={n} type="button" size="sm" variant="outline" onClick={() => repartirCuotas(n)}>{n}</Button>)}

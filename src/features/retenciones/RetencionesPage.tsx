@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import {
@@ -179,6 +180,7 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
   const [errores, setErrores] = useState<Record<string, string[]>>({})
   const [buscando, setBuscando] = useState(false)
   const idem = useRef(uid())
+  const docsPag = usePaginaLocal(docs, 3, 1)
 
   // Serie por defecto: la predeterminada o la primera (derivada; el usuario puede cambiarla).
   const serie = serieId || String(op.data?.series.find((s) => s.predeterminada)?.id ?? op.data?.series[0]?.id ?? "")
@@ -217,7 +219,7 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-4xl">
+      <DialogContent className="sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle>Nueva {nombre(tipo)}</DialogTitle>
           <DialogDescription>
@@ -228,7 +230,9 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
           <Alert variant="destructive"><AlertTitle>No hay series de {nombre(tipo)}</AlertTitle><AlertDescription>Crea una serie que empiece con {esRet ? "R" : "P"} en Configuración → Locales y series.</AlertDescription></Alert>
         ) : op.data && (
           <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
+            <SeccionesModal secciones={[
+{ id: "datos", label: "Datos", contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-[10rem_1fr]">
               <Field>
                 <FieldLabel>Serie</FieldLabel>
                 <Select value={serie} onValueChange={setSerieId}>
@@ -266,7 +270,9 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
               <FieldError errors={[...err("tercero.tipo_doc"), ...err("tercero.num_doc"), ...err("tercero.razon_social")]} />
             </FieldSet>
 
-            <FieldSet>
+            </div>) },
+{ id: "comprobantes", label: "Comprobantes", contenido: (<div className="flex flex-col gap-5">
+<FieldSet>
               <FieldLegend variant="label">Comprobantes {esRet ? "pagados" : "cobrados"}</FieldLegend>
               <Table>
                 <TableHeader>
@@ -277,7 +283,7 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {docs.map((d, i) => (
+                  {docsPag.visibles.map((d, k) => { const i = docsPag.offset + k; return (
                     <TableRow key={d.key}>
                       <TableCell>
                         <Select value={d.tipo_doc} onValueChange={(v) => setDoc(i, "tipo_doc", v)}>
@@ -292,13 +298,16 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
                       <TableCell className="text-right tabular-nums">{soles(calc[i].imp)}</TableCell>
                       <TableCell>{docs.length > 1 && <Button variant="destructive" size="icon" aria-label="Quitar" onClick={() => setDocs(docs.filter((_, j) => j !== i))}><Trash2Icon /></Button>}</TableCell>
                     </TableRow>
-                  ))}
+                  ) })}
                 </TableBody>
               </Table>
               <FieldError errors={Object.keys(errores).filter((k) => k.startsWith("documentos")).slice(0, 1).flatMap((k) => err(k))} />
-              <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => setDocs([...docs, docVacio()])}><PlusIcon /> Agregar comprobante</Button>
+              <Button type="button" variant="outline" size="sm" className="self-start" onClick={() => { setDocs([...docs, docVacio()]); docsPag.irAlFinal() }}><PlusIcon /> Agregar comprobante</Button>
+              {docsPag.pager}
             </FieldSet>
 
+</div>) },
+{ id: "totales", label: "Totales", contenido: (<div className="flex flex-col gap-5">
             <div className="grid gap-4 sm:grid-cols-[1fr_18rem]">
               <Field>
                 <FieldLabel htmlFor="ret-obs">Observación</FieldLabel>
@@ -311,7 +320,9 @@ function NuevoDialog({ tipo, onClose, onCreado }: { tipo: Tipo; onClose: () => v
                 <div className="flex justify-between font-medium"><span>{esRet ? "Neto pagado" : "Total cobrado"}</span><span className="tabular-nums">{soles(r2(tot.neto))}</span></div>
               </div>
             </div>
-          </FieldGroup>
+          </div>) },
+]} />
+</FieldGroup>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
@@ -338,6 +349,8 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
     refetchInterval: (q) => (q.state.data && (PENDIENTES.includes(q.state.data.estado) || q.state.data.reversion?.estado === "enviado") ? 3000 : false),
   })
   const r = d.data
+  const docsPag = usePaginaLocal(r?.documentos ?? [], 5, 2)
+  const histPag = usePaginaLocal(r?.historial ?? [], 6, 5)
   const refrescar = (x: Detalle) => { qc.setQueryData(["retencion", id], x); qc.invalidateQueries({ queryKey: ["retenciones"] }) }
   const reintentar = useMutation({
     mutationFn: async () => (await api.post<{ data: Detalle; message: string }>(`/retenciones/${id}/reintentar`)).data,
@@ -352,7 +365,7 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
 
   return (
     <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-3xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-3xl">
         <DialogHeader className="p-4 pr-12">
           <DialogTitle className="tabular-nums">{r?.numero ?? "Comprobante"}</DialogTitle>
           <DialogDescription>{r ? `${r.tipo_label} · ${r.fecha_emision} · ${r.regimen} ${r.regimen_label}` : "Cargando…"}</DialogDescription>
@@ -360,7 +373,9 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
         {d.isLoading && <div className="p-4"><Skeleton className="h-64" /></div>}
         {r && (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
+            <SeccionesModal secciones={[
+{ id: "resumen", label: "Resumen", contenido: (<div className="flex flex-col gap-5">
+<div className="flex flex-wrap items-center gap-2">
               <EstadoBadge estado={r.estado} />
               {r.sunat_codigo && <Badge variant="outline">SUNAT {r.sunat_codigo}</Badge>}
             </div>
@@ -391,12 +406,14 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
               <p>{r.tercero.razon_social}</p>
               <p className="tabular-nums text-xs text-muted-foreground">{r.tercero.tipo_doc === "6" ? "RUC" : "Doc."} {r.tercero.num_doc}{r.tercero.direccion ? ` · ${r.tercero.direccion}` : ""}</p>
             </section>
-            <section>
+            </div>) },
+{ id: "comprobantes", label: "Comprobantes", contenido: (<div className="flex flex-col gap-5">
+<section>
               <h3 className="mb-1 font-medium">Comprobantes relacionados</h3>
               <Table>
                 <TableHeader><TableRow><TableHead>Número</TableHead><TableHead>Emisión</TableHead><TableHead>{r.tipo_documento === "20" ? "Pago" : "Cobro"}</TableHead><TableHead className="text-right">Total</TableHead><TableHead className="text-right">{r.tipo_documento === "20" ? "Retenido" : "Percibido"}</TableHead></TableRow></TableHeader>
                 <TableBody>
-                  {r.documentos.map((x, i) => (
+                  {docsPag.visibles.map((x, i) => (
                     <TableRow key={i}>
                       <TableCell className="tabular-nums">{x.num_doc}</TableCell><TableCell>{x.fecha_emision}</TableCell><TableCell>{x.fecha_pago}</TableCell>
                       <TableCell className="text-right tabular-nums">{soles(x.imp_total)}</TableCell><TableCell className="text-right tabular-nums">{soles(x.importe)}</TableCell>
@@ -404,6 +421,7 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
                   ))}
                 </TableBody>
               </Table>
+              {docsPag.pager}
             </section>
             <section className="flex flex-col gap-1">
               <div className="flex justify-between"><span className="text-muted-foreground">Importe de los comprobantes</span><span className="tabular-nums">{soles(r.importe_documentos)}</span></div>
@@ -411,19 +429,24 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
               <div className="flex justify-between font-medium"><span>{r.tipo_documento === "20" ? "Neto pagado" : "Total cobrado"}</span><span className="tabular-nums">{soles(r.importe_neto)}</span></div>
             </section>
             {r.observacion && <p className="text-muted-foreground">{r.observacion}</p>}
-            <Separator />
+            </div>) },
+{ id: "historial", label: "Historial", contenido: (<div className="flex flex-col gap-5">
+<Separator />
             <section>
               <h3 className="mb-2 font-medium">Historial</h3>
-              <ol className="flex flex-col gap-2 border-l pl-4">
-                {r.historial.map((h, i) => (
+              <ol className="flex flex-col gap-3">
+                {histPag.visibles.map((h, i) => (
                   <li key={i}>
                     <div className="flex items-center gap-2"><EstadoBadge estado={h.estado as Estado} /><span className="text-xs text-muted-foreground">{new Date(h.fecha).toLocaleString("es-PE")}</span></div>
                     {h.detalle && <p className="mt-1 text-xs text-muted-foreground">{h.detalle}</p>}
                   </li>
                 ))}
               </ol>
+              {histPag.pager}
             </section>
-          </div>
+          </div>) },
+]} />
+</div>
         )}
         <Dialog open={revertir} onOpenChange={(o) => !o && setRevertir(false)}>
           <DialogContent>

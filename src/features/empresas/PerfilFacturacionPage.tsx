@@ -349,7 +349,7 @@ function LogoCard({ p, empresaId, editable, onOk }: TabProps) {
         <CardDescription>PNG o JPG, hasta 2 MB.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-        <div className="flex h-28 w-56 items-center justify-center overflow-hidden rounded-lg bg-white p-2 ring-1 ring-foreground/10">
+        <div className="flex h-28 w-56 items-center justify-center overflow-hidden rounded-lg bg-white p-2">
           {p.logo_url ? <img src={p.logo_url} alt="Logo de la empresa" className="max-h-full max-w-full object-contain" /> : <ImageIcon className="size-8 text-muted-foreground" />}
         </div>
         {editable && (

@@ -301,7 +301,7 @@ function FormularioGuia({ o }: { o: Opciones }) {
                     </Field>
                   </div>
                   {conductores.map((c, i) => (
-                    <div key={i} className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[8rem_1fr_1fr_1fr_9rem_auto] sm:items-end">
+                    <div key={i} className="grid gap-3 rounded-lg bg-foreground/5 p-3 sm:grid-cols-[8rem_1fr_1fr_1fr_9rem_auto] sm:items-end">
                       <Field>
                         <FieldLabel htmlFor={`ct${i}`}>{i === 0 ? "Conductor" : "Secundario"}</FieldLabel>
                         <Select value={c.tipo_doc} onValueChange={(v) => setConductores(conductores.map((x, j) => (j === i ? { ...x, tipo_doc: v } : x)))}>

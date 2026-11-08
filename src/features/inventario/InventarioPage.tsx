@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { ArrowRightLeftIcon, BoxesIcon, ClipboardListIcon, HistoryIcon, PackagePlusIcon, PlusIcon, Trash2Icon } from "lucide-react"
@@ -172,6 +173,7 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
   const [documento, setDocumento] = useState("")
   const [obs, setObs] = useState("")
   const [lineas, setLineas] = useState<Linea[]>([])
+  const lineasPag = usePaginaLocal(lineas, 4, 2)
   const titulo = { entrada: "Entrada de mercadería", salida: "Salida de mercadería", ajuste: "Ajuste a inventario físico", transferencia: "Transferencia entre almacenes" }[op]
 
   const m = useMutation({
@@ -197,7 +199,7 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{titulo}</DialogTitle>
           <DialogDescription>
@@ -205,7 +207,9 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
           </DialogDescription>
         </DialogHeader>
         <FieldGroup>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <SeccionesModal secciones={[
+{ id: "datos", label: "Datos", contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-2">
             <Field>
               <FieldLabel>{op === "transferencia" ? "Almacén de origen" : "Almacén"}</FieldLabel>
               <Select value={almacen} onValueChange={setAlmacen}>
@@ -232,7 +236,9 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
             <FieldLabel htmlFor="obs-inv">{op === "entrada" || op === "transferencia" ? "Observación" : "Motivo"}</FieldLabel>
             <Input id="obs-inv" placeholder={op === "salida" ? "Merma, consumo interno, donación…" : op === "ajuste" ? "Conteo físico mensual" : ""} value={obs} onChange={(e) => setObs(e.target.value)} />
           </Field>
-          <div className="flex items-center justify-between">
+          </div>) },
+{ id: "productos", label: "Productos", contenido: (<div className="flex flex-col gap-5">
+<div className="flex items-center justify-between">
             <span className="text-sm font-medium">Productos</span>
             <ProductoPicker onSelect={(p) => !lineas.some((l) => l.producto.id === p.id) && setLineas((ls) => [...ls, { producto: p, cantidad: "", costo: p.costo ? String(p.costo) : "" }])} />
           </div>
@@ -247,18 +253,21 @@ function OperacionDialog({ op, almacenes, almacenInicial, onClose, onDone }: { o
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {lineas.map((l, i) => (
+                {lineasPag.visibles.map((l, k) => { const i = lineasPag.offset + k; return (
                   <TableRow key={l.producto.id}>
                     <TableCell>{l.producto.descripcion}<div className="tabular-nums text-xs text-muted-foreground">{l.producto.codigo}</div></TableCell>
                     <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Cantidad" value={l.cantidad} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, cantidad: e.target.value } : x)))} /></TableCell>
                     {op === "entrada" && <TableCell><Input inputMode="decimal" className="tabular-nums" aria-label="Costo unitario" value={l.costo} onChange={(e) => setLineas((ls) => ls.map((x, j) => (j === i ? { ...x, costo: e.target.value } : x)))} /></TableCell>}
                     <TableCell><Button variant="destructive" size="icon" aria-label="Quitar" onClick={() => setLineas((ls) => ls.filter((_, j) => j !== i))}><Trash2Icon /></Button></TableCell>
                   </TableRow>
-                ))}
+                ) })}
               </TableBody>
             </Table>
           )}
-        </FieldGroup>
+          {lineasPag.pager}
+        </div>) },
+]} />
+</FieldGroup>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>
           <Button disabled={!valido || m.isPending} onClick={() => m.mutate()}>{m.isPending && <Spinner />} Registrar</Button>
@@ -307,9 +316,10 @@ function KardexSheet({ productoId, almacenId, onClose }: { productoId: number | 
     enabled: productoId !== null,
     queryFn: async () => (await api.get<{ data: Kardex }>(`/inventario/kardex/${productoId}`, { params: { almacen_id: almacenId } })).data.data,
   })
+  const movPag = usePaginaLocal(k.data?.movimientos ?? [], 7, 1)
   return (
     <Dialog open={productoId !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-3xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-3xl">
         <DialogHeader className="p-4 pr-12">
           <DialogTitle>Kardex · {k.data?.producto.descripcion ?? ""}</DialogTitle>
           <DialogDescription>Movimientos valorizados con saldo y costo promedio.</DialogDescription>
@@ -325,7 +335,7 @@ function KardexSheet({ productoId, almacenId, onClose }: { productoId: number | 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {k.data?.movimientos.map((m) => (
+                {movPag.visibles.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="whitespace-nowrap text-xs">{new Date(m.fecha).toLocaleString("es-PE", { dateStyle: "short", timeStyle: "short" })}<div className="text-muted-foreground">{m.usuario}</div></TableCell>
                     <TableCell><Badge variant={m.sentido === "entrada" ? "outline" : "secondary"}>{TIPOS[m.tipo] ?? m.tipo}</Badge></TableCell>
@@ -339,6 +349,7 @@ function KardexSheet({ productoId, almacenId, onClose }: { productoId: number | 
               </TableBody>
             </Table>
           )}
+          {movPag.pager}
         </div>
       </DialogContent>
     </Dialog>

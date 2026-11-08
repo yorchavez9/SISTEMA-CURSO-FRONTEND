@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { Link, useSearchParams } from "react-router"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -173,16 +174,20 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
     refetchInterval: (query) => (query.state.data && ["por_enviar", "enviado"].includes(query.state.data.estado) ? 3000 : false),
   })
   const g = q.data
+  const bienesPag = usePaginaLocal(g?.items ?? [], 6, 3)
+  const histPag = usePaginaLocal(g?.historial ?? [], 6, 5)
   return (
     <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+      <DialogContent className="flex flex-col gap-0 p-0 sm:max-w-2xl">
         <DialogHeader className="p-4 pr-12">
           <DialogTitle className="tabular-nums">{g?.numero ?? "Guía de remisión"}</DialogTitle>
           <DialogDescription>{g ? `${g.motivo} · ${g.modalidad}` : "Cargando…"}</DialogDescription>
         </DialogHeader>
         {!g ? <div className="px-4"><Skeleton className="h-64" /></div> : (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
-            <div className="flex flex-wrap items-center gap-2">
+            <SeccionesModal secciones={[
+{ id: "resumen", label: "Resumen", contenido: (<div className="flex flex-col gap-5">
+<div className="flex flex-wrap items-center gap-2">
               <EstadoGuiaBadge estado={g.estado} />
               {g.sunat_codigo && <span className="text-muted-foreground">{g.sunat_codigo} {g.sunat_descripcion}</span>}
             </div>
@@ -216,7 +221,9 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
               <p className="tabular-nums text-muted-foreground">{g.destinatario.num_doc}</p>
               {g.comprobante && <p className="text-muted-foreground">Sustenta el comprobante <span className="tabular-nums">{g.comprobante.numero}</span></p>}
             </Seccion>
-            <Seccion titulo="Traslado">
+            </div>) },
+{ id: "traslado", label: "Traslado", contenido: (<div className="flex flex-col gap-5">
+<Seccion titulo="Traslado">
               <Dato k="Fecha de traslado" v={g.fecha_traslado} />
               <Dato k="Peso bruto" v={`${g.peso_total} ${g.und_peso_total}`} />
               {g.num_bultos && <Dato k="Bultos" v={String(g.num_bultos)} />}
@@ -229,11 +236,13 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
               {g.vehiculo && <Dato k="Vehículo" v={[g.vehiculo.placa, ...(g.vehiculo.secundarios ?? []).map((s) => s.placa)].join(", ")} />}
               {g.conductores.map((c) => <Dato key={c.num_doc} k={c.tipo ?? "Conductor"} v={`${c.nombres} ${c.apellidos} · ${c.num_doc} · Lic. ${c.licencia}`} />)}
             </Seccion>
-            <Seccion titulo="Bienes">
+            </div>) },
+{ id: "bienes", label: "Bienes", contenido: (<div className="flex flex-col gap-5">
+<Seccion titulo="Bienes">
               <Table>
                 <TableHeader><TableRow><TableHead>Descripción</TableHead><TableHead className="text-right">Cantidad</TableHead></TableRow></TableHeader>
                 <TableBody>
-                  {g.items.map((i, n) => (
+                  {bienesPag.visibles.map((i, n) => (
                     <TableRow key={n}>
                       <TableCell>{i.descripcion}{i.codigo && <div className="tabular-nums text-xs text-muted-foreground">{i.codigo}</div>}</TableCell>
                       <TableCell className="text-right tabular-nums">{i.cantidad} {i.unidad}</TableCell>
@@ -241,20 +250,26 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
                   ))}
                 </TableBody>
               </Table>
+              {bienesPag.pager}
             </Seccion>
-            <Separator />
+            </div>) },
+{ id: "historial", label: "Historial", contenido: (<div className="flex flex-col gap-5">
+<Separator />
             <Seccion titulo="Historial">
               <ol className="flex flex-col gap-2">
-                {g.historial.map((h, n) => (
+                {histPag.visibles.map((h, n) => (
                   <li key={n} className="flex flex-col">
                     <span className="text-xs text-muted-foreground">{new Date(h.fecha).toLocaleString("es-PE")}</span>
                     <span>{h.detalle ?? h.estado}</span>
                   </li>
                 ))}
               </ol>
+              {histPag.pager}
               <p className="mt-2 text-xs text-muted-foreground">Emitida por {g.usuario ?? "—"}{g.ticket && ` · ticket ${g.ticket}`}</p>
             </Seccion>
-          </div>
+          </div>) },
+]} />
+</div>
         )}
       </DialogContent>
     </Dialog>

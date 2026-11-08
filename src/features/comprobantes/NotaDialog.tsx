@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { SeccionesModal } from "@/components/shared/SeccionesModal"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { toast } from "sonner"
 import { CircleAlertIcon, PlusIcon, Trash2Icon } from "lucide-react"
@@ -92,7 +93,7 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{esNC ? "Nota de crédito" : "Nota de débito"} sobre {d?.comprobante.numero ?? "…"}</DialogTitle>
           <DialogDescription>{d ? `${d.comprobante.cliente} · total ${soles(d.comprobante.total)}${esNC ? ` · crédito disponible ${soles(d.credito_disponible)}` : ""}` : "Cargando…"}</DialogDescription>
@@ -101,7 +102,9 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
           <Alert variant="destructive"><AlertDescription>{toApiError(op.error).message}</AlertDescription></Alert>
         ) : d && (
           <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-[1fr_9rem]">
+            <SeccionesModal secciones={[
+{ id: "motivo", label: "Motivo", contenido: (<div className="flex flex-col gap-5">
+<div className="grid gap-4 sm:grid-cols-[1fr_9rem]">
               <Field>
                 <FieldLabel>Motivo ({esNC ? "catálogo 09" : "catálogo 10"})</FieldLabel>
                 <Select value={motivo} onValueChange={(v) => { setMotivo(v); setDesMotivo(motivos.find((x) => x.codigo === v)?.descripcion ?? "") }}>
@@ -129,7 +132,9 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
               <Input id="des-motivo" value={desMotivo} onChange={(e) => setDesMotivo(e.target.value)} />
             </Field>
 
-            {modo === "total" && (
+            </div>) },
+{ id: "detalle", label: "Detalle", contenido: (<div className="flex flex-col gap-5">
+{modo === "total" && (
               <Table>
                 <TableBody>
                   {d.lineas.map((l) => (
@@ -180,7 +185,7 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
               </Field>
             )}
             {esNC && d.venta.pagado > 0 && puede("caja.operar") && (
-              <div className="flex flex-col gap-2 rounded-lg border p-3">
+              <div className="flex flex-col gap-2 rounded-lg bg-foreground/5 p-3">
                 <Field orientation="horizontal">
                   <Switch id="reembolso" checked={reembolsar} onCheckedChange={setReembolsar} />
                   <FieldLabel htmlFor="reembolso">Devolver dinero al cliente (pagó {soles(d.venta.pagado)})</FieldLabel>
@@ -201,7 +206,9 @@ export function NotaDialog({ comprobanteId, tipo, onClose, onCreada }: { comprob
               <span className="tabular-nums text-xl font-semibold">{soles(estimado, d.comprobante.moneda)}</span>
             </div>
             {bloqueo && <Alert variant="destructive"><CircleAlertIcon /><AlertDescription>{bloqueo}</AlertDescription></Alert>}
-          </FieldGroup>
+          </div>) },
+]} />
+</FieldGroup>
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>

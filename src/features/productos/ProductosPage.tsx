@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -15,7 +16,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -311,6 +312,7 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
     },
   })
   const pres = useFieldArray({ control: form.control, name: "presentaciones" })
+  const presPag = usePaginaLocal(pres.fields, 3, 1)
   const tipo = form.watch("tipo")
   const conIsc = form.watch("con_isc")
   const icbper = form.watch("aplica_icbper")
@@ -365,14 +367,14 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{producto ? "Editar producto" : "Nuevo producto o servicio"}</DialogTitle>
           <DialogDescription>El precio de venta incluye impuestos; el sistema calcula valor de venta e IGV al emitir.</DialogDescription>
         </DialogHeader>
         <form id="form-producto" onSubmit={onSubmit} noValidate className="flex flex-col gap-6">
-          <FieldSet>
-            <FieldLegend>Datos generales</FieldLegend>
+          <SeccionesModal secciones={[
+          { id: "general", label: "General", error: !!(errors.codigo || errors.descripcion), contenido: (
             <FieldGroup>
               <div className="flex items-center gap-4">
                 <ProductoImagen url={vistaPrevia ?? imagen.url} alt="Imagen del producto" className="size-24 rounded-lg" />
@@ -415,6 +417,10 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                   )} />
                 </Field>
               </div>
+            </FieldGroup>
+          ) },
+          { id: "clasificacion", label: "Clasificación", error: !!(errors.unidad || errors.cod_producto_sunat), contenido: (
+            <FieldGroup>
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field>
                   <FieldLabel>Unidad de medida</FieldLabel>
@@ -459,10 +465,8 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                 </Field>
               </div>
             </FieldGroup>
-          </FieldSet>
-
-          <FieldSet>
-            <FieldLegend>Precio e impuestos</FieldLegend>
+          ) },
+          { id: "precio", label: "Precio", error: !!(errors.precio_venta || errors.costo || errors.tip_afe_igv || errors.porcentaje_isc || errors.factor_icbper), contenido: (
             <FieldGroup>
               <div className="grid gap-4 sm:grid-cols-[1fr_1fr_2fr]">
                 <Field data-invalid={!!errors.precio_venta}>
@@ -509,11 +513,8 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                 </Field>
               </div>
             </FieldGroup>
-          </FieldSet>
-
-          {tipo === "bien" && (
-            <FieldSet>
-              <FieldLegend>Inventario y presentaciones</FieldLegend>
+          ) },
+          { id: "inventario", label: "Inventario", oculta: tipo !== "bien", error: !!errors.stock_minimo, contenido: (
               <FieldGroup>
                 <div className="grid items-end gap-4 sm:grid-cols-2">
                   <Field orientation="horizontal">
@@ -540,8 +541,8 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                     </>
                   )}
                 </div>
-                {pres.fields.map((f, i) => (
-                  <div key={f.id} className="grid grid-cols-[1fr_6rem_6rem_7rem_auto] items-end gap-2">
+                {presPag.visibles.map((f, k) => { const i = presPag.offset + k; return (
+                  <div key={f.id} className="grid grid-cols-2 items-end gap-2 sm:grid-cols-[1fr_6rem_6rem_7rem_auto]">
                     <Field><FieldLabel className="sr-only" htmlFor={`pr-n-${i}`}>Nombre</FieldLabel><Input id={`pr-n-${i}`} placeholder="Caja x 12" {...form.register(`presentaciones.${i}.nombre`)} /></Field>
                     <Controller control={form.control} name={`presentaciones.${i}.unidad`} render={({ field }) => (
                       <Select value={field.value} onValueChange={field.onChange}>
@@ -553,13 +554,14 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                     <Input inputMode="decimal" placeholder="Precio" aria-label="Precio de la presentación" {...form.register(`presentaciones.${i}.precio_venta`)} />
                     <Button type="button" variant="destructive" size="icon" aria-label="Quitar presentación" onClick={() => pres.remove(i)}><Trash2Icon /></Button>
                   </div>
-                ))}
+                ) })}
+                {presPag.pager}
                 <Button type="button" variant="outline" className="self-start" onClick={() => pres.append({ nombre: "", unidad: "BX", factor: "", precio_venta: "" })}>
                   <PlusIcon /> Agregar presentación
                 </Button>
               </FieldGroup>
-            </FieldSet>
-          )}
+          ) },
+          ]} />
         </form>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancelar</Button>

@@ -49,7 +49,7 @@
 }
 
 :root {
-    --background: oklch(0.967 0 0); /* página gris suave; tarjetas blancas sin borde */
+    --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -65,7 +65,7 @@
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
     --border: transparent; /* sin líneas: las superficies se separan por color */
-    --input: oklch(0.922 0 0);
+    --input: transparent;
     --ring: oklch(0.708 0 0);
     --chart-1: oklch(0.87 0 0);
     --series-1: #2a78d6; /* serie de datos: validado (contraste ≥3:1 sobre fondo claro) */
@@ -74,7 +74,7 @@
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
     --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
+    --sidebar: oklch(1 0 0);
     --sidebar-foreground: oklch(0.145 0 0);
     --sidebar-primary: oklch(0.205 0 0);
     --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -85,11 +85,11 @@
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --background: oklch(0.16 0 0);
     --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
+    --card: oklch(0.16 0 0);
     --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
+    --popover: oklch(0.21 0 0);
     --popover-foreground: oklch(0.985 0 0);
     --primary: oklch(0.922 0 0);
     --primary-foreground: oklch(0.205 0 0);
@@ -101,7 +101,7 @@
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
     --border: transparent;
-    --input: oklch(1 0 0 / 15%);
+    --input: transparent;
     --ring: oklch(0.556 0 0);
     --chart-1: oklch(0.87 0 0);
     --series-1: #3987e5; /* paso oscuro del mismo tono, validado sobre #171717 */
@@ -109,10 +109,10 @@
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
     --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
+    --sidebar: oklch(0.16 0 0);
     --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.922 0 0);
+    --sidebar-primary-foreground: oklch(0.205 0 0);
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: transparent;
@@ -133,3 +133,25 @@
     @apply font-sans;
     }
 }
+
+/* tablas-responsivas: en celular cada fila es un bloque y cada celda muestra el título de su columna. */
+@media (max-width: 1023px) {
+  [data-slot="table-cell"].hidden { display: none; }
+  [data-slot="table-header"] { display: none; }
+  [data-slot="table"], [data-slot="table-body"] { display: block; width: 100%; }
+  [data-slot="table-row"] { display: block; padding: 0.75rem 0; }
+  [data-slot="table-cell"]:not(.hidden) {
+    display: flex; align-items: center; justify-content: flex-end; column-gap: 0.75rem;
+    min-width: 0; max-width: none; padding: 0.25rem 0; text-align: right; white-space: normal;
+  }
+  [data-slot="table-cell"]:not([data-label]), [data-slot="table-cell"][data-label=""] { justify-content: flex-end; }
+  [data-slot="table-cell"][data-label]:not([data-label=""])::before {
+    content: attr(data-label); flex-shrink: 0; margin-right: auto; color: var(--muted-foreground); font-size: 0.75rem; text-align: left;
+  }
+  [data-slot="table-cell"] > :is(input, button[data-slot="select-trigger"], [data-slot="input-group"]) { flex: 1; min-width: 0; }
+  [data-slot="table-cell"] > div { min-width: 0; }
+}
+
+/* Modales: si la pantalla es muy baja el contenido se desplaza sin barra visible. */
+[data-slot="dialog-content"], [data-slot="alert-dialog-content"] { scrollbar-width: none; }
+[data-slot="dialog-content"]::-webkit-scrollbar, [data-slot="alert-dialog-content"]::-webkit-scrollbar { display: none; }
