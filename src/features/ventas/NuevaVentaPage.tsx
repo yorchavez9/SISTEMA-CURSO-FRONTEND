@@ -22,6 +22,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { soles, useDebounced } from "@/components/shared/listado"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { ProductoImagen } from "@/components/shared/ProductoImagen"
 import { useAuth } from "@/features/auth/auth-context"
 import { ClienteDialog, type ClienteDto } from "@/features/clientes/ClientesPage"
 import type { ProductoDto } from "@/features/productos/ProductosPage"
@@ -539,6 +540,7 @@ export function ProductoCombobox({ onSelect }: { onSelect: (p: ProductoDto) => v
             <CommandGroup>
               {res.data?.map((p) => (
                 <CommandItem key={p.id} value={String(p.id)} onSelect={() => { onSelect(p); setOpen(false); setQ("") }}>
+                  <ProductoImagen url={p.imagen_url} alt={p.descripcion} className="size-9" />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate">{p.descripcion}</span>
                     <span className="tabular-nums text-xs text-muted-foreground">{p.codigo} · afect. {p.tip_afe_igv}</span>

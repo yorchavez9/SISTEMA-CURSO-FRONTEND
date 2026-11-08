@@ -1,10 +1,10 @@
-import { useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
-import { CheckIcon, ChevronsUpDownIcon, MoreHorizontalIcon, PackageIcon, PencilIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react"
+import { CheckIcon, ChevronsUpDownIcon, ImageIcon, ImageOffIcon, MoreHorizontalIcon, PackageIcon, PencilIcon, PlusIcon, Trash2Icon, XIcon } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Buscador, Paginador, soles, useDebounced, type MetaPaginacion } from "@/components/shared/listado"
 import { PageHeader } from "@/components/shared/PageHeader"
+import { ProductoImagen } from "@/components/shared/ProductoImagen"
 import { useAuth } from "@/features/auth/auth-context"
 import { useCatalogos } from "@/features/tributos/ConfiguracionTributariaPage"
 import { api, applyServerErrors, toApiError } from "@/lib/api"
@@ -49,6 +50,9 @@ export interface ProductoDto {
   controla_stock: boolean
   stock_minimo: number
   activo: boolean
+  /** Foto subida o ilustración generada (color e ícono de la categoría). */
+  imagen_url: string | null
+  imagen_generada: boolean
   presentaciones: { id: number; nombre: string; unidad: string; factor: number; precio_venta: number; codigo_barras: string | null }[]
 }
 interface Categoria { id: number; nombre: string }
@@ -138,13 +142,18 @@ export function ProductosPage() {
                   <TableRow key={p.id}>
                     <TableCell className="tabular-nums">{p.codigo}</TableCell>
                     <TableCell>
-                      <div className="font-medium">{p.descripcion}</div>
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        <Badge variant="outline">{p.tipo === "servicio" ? "Servicio" : "Bien"} · {p.unidad}</Badge>
-                        {p.categoria && <Badge variant="secondary">{p.categoria.nombre}</Badge>}
-                        {p.porcentaje_isc && <Badge variant="outline">ISC {p.porcentaje_isc}%</Badge>}
-                        {p.aplica_icbper && <Badge variant="outline">ICBPER</Badge>}
-                        {!p.activo && <Badge variant="destructive">Inactivo</Badge>}
+                      <div className="flex items-center gap-3">
+                        <ProductoImagen url={p.imagen_url} alt={p.descripcion} className="size-12" />
+                        <div className="min-w-0">
+                          <div className="font-medium">{p.descripcion}</div>
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            <Badge variant="outline">{p.tipo === "servicio" ? "Servicio" : "Bien"} · {p.unidad}</Badge>
+                            {p.categoria && <Badge variant="secondary">{p.categoria.nombre}</Badge>}
+                            {p.porcentaje_isc && <Badge variant="outline">ISC {p.porcentaje_isc}%</Badge>}
+                            {p.aplica_icbper && <Badge variant="outline">ICBPER</Badge>}
+                            {!p.activo && <Badge variant="destructive">Inactivo</Badge>}
+                          </div>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="hidden max-w-56 text-sm md:table-cell"><span className="tabular-nums">{p.tip_afe_igv}</span> · {afeLabel(p.tip_afe_igv)}</TableCell>
@@ -237,6 +246,34 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
   const qc = useQueryClient()
   const categorias = useQuery({ queryKey: ["categorias"], queryFn: async () => (await api.get<{ data: Categoria[] }>("/categorias")).data.data })
   const [nuevaCat, setNuevaCat] = useState("")
+  // Imagen: la foto elegida se sube después de guardar el producto (también al crearlo).
+  const [foto, setFoto] = useState<File | null>(null)
+  const [imagen, setImagen] = useState({ url: producto?.imagen_url ?? null, generada: producto?.imagen_generada ?? true })
+  const [quitando, setQuitando] = useState(false)
+  const archivoRef = useRef<HTMLInputElement>(null)
+  const vistaPrevia = useMemo(() => (foto ? URL.createObjectURL(foto) : null), [foto])
+  useEffect(() => () => { if (vistaPrevia) URL.revokeObjectURL(vistaPrevia) }, [vistaPrevia])
+  const elegirFoto = (f: File | undefined) => {
+    if (!f) return
+    if (!["image/jpeg", "image/png", "image/webp"].includes(f.type)) { toast.error("Usa una imagen JPG, PNG o WebP."); return }
+    if (f.size > 4 * 1024 * 1024) { toast.error("La imagen no debe pasar de 4 MB."); return }
+    setFoto(f)
+  }
+  const quitarFoto = async () => {
+    if (foto) { setFoto(null); return }
+    if (!producto) return
+    setQuitando(true)
+    try {
+      const r = await api.delete<{ data: ProductoDto; message: string }>(`/productos/${producto.id}/imagen`)
+      setImagen({ url: r.data.data.imagen_url, generada: true })
+      toast.success(r.data.message)
+      onSaved()
+    } catch (e) {
+      toast.error(toApiError(e).message)
+    } finally {
+      setQuitando(false)
+    }
+  }
   const afectaciones = (cat.data?.afectaciones_igv ?? []).filter((a) => a.activo || a.codigo === producto?.tip_afe_igv)
   const unidades = cat.data?.catalogos["03"] ?? []
 
@@ -293,7 +330,16 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
       presentaciones: v.presentaciones.map((p) => ({ ...p, factor: Number(p.factor), precio_venta: Number(p.precio_venta) })),
     }
     try {
-      const r = producto ? await api.put(`/productos/${producto.id}`, body) : await api.post("/productos", body)
+      const r = producto ? await api.put<{ data: ProductoDto; message: string }>(`/productos/${producto.id}`, body) : await api.post<{ data: ProductoDto; message: string }>("/productos", body)
+      if (foto) {
+        const fd = new FormData()
+        fd.append("imagen", foto)
+        try {
+          await api.post(`/productos/${r.data.data.id}/imagen`, fd)
+        } catch (e) {
+          toast.error(`Producto guardado, pero no se pudo subir la imagen: ${Object.values(toApiError(e).errors)[0]?.[0] ?? toApiError(e).message}`)
+        }
+      }
       toast.success(r.data.message)
       onSaved()
       onClose()
@@ -316,6 +362,26 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
           <FieldSet>
             <FieldLegend>Datos generales</FieldLegend>
             <FieldGroup>
+              <div className="flex items-center gap-4">
+                <ProductoImagen url={vistaPrevia ?? imagen.url} alt="Imagen del producto" className="size-24 rounded-lg" />
+                <div className="flex flex-col gap-2">
+                  <div className="flex flex-wrap gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => archivoRef.current?.click()}>
+                      <ImageIcon /> {foto || !imagen.generada ? "Cambiar foto" : "Subir foto"}
+                    </Button>
+                    {(foto || (producto && !imagen.generada)) && (
+                      <Button type="button" variant="destructive" size="sm" disabled={quitando} onClick={quitarFoto}>
+                        {quitando ? <Spinner data-icon="inline-start" /> : <ImageOffIcon />} Quitar foto
+                      </Button>
+                    )}
+                  </div>
+                  <FieldDescription>
+                    {foto ? `${foto.name}: se subirá al guardar.` : imagen.generada ? "Sin foto: se muestra una ilustración con el color de la categoría." : "JPG, PNG o WebP hasta 4 MB."}
+                  </FieldDescription>
+                  <input ref={archivoRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
+                    onChange={(e) => { elegirFoto(e.target.files?.[0]); e.target.value = "" }} />
+                </div>
+              </div>
               <div className="grid gap-4 sm:grid-cols-[10rem_1fr_9rem]">
                 <Field data-invalid={!!errors.codigo}>
                   <FieldLabel htmlFor="p-cod">Código</FieldLabel>
