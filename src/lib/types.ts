@@ -43,6 +43,8 @@ export interface CredencialApiEstado {
   entorno: Entorno
   configurada: boolean
   api_key_mascara: string | null
+  /** URL base propia de este entorno; null = la por defecto del servidor (.env). */
+  base_url: string | null
   api_secret_configurado: boolean
   verificado_at: string | null
   verificacion_ok: boolean | null

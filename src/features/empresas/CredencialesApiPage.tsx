@@ -120,6 +120,7 @@ export function CredencialesApiPage() {
                 key={estado.entorno}
                 empresaId={empresa.id}
                 estado={estado}
+                urlDefecto={query.data.base_url}
                 enUso={estado.entorno === query.data.entorno_activo}
               />
             ))}
@@ -199,7 +200,7 @@ function EntornoActivoCard({ empresaId, actual, estados }: { empresaId: number; 
   )
 }
 
-function CredencialCard({ empresaId, estado, enUso }: { empresaId: number; estado: CredencialApiEstado; enUso: boolean }) {
+function CredencialCard({ empresaId, estado, enUso, urlDefecto }: { empresaId: number; estado: CredencialApiEstado; enUso: boolean; urlDefecto: string }) {
   const info = ENTORNO_INFO[estado.entorno]
   const guardar = useGuardarCredenciales(empresaId, estado.entorno)
   const verificar = useVerificarCredenciales(empresaId, estado.entorno)
@@ -207,19 +208,24 @@ function CredencialCard({ empresaId, estado, enUso }: { empresaId: number; estad
   const [verSecreto, setVerSecreto] = useState(false)
 
   const schema = z.object({
-    api_key: z.string().trim().min(8, "El API Key debe tener al menos 8 caracteres.").regex(/^\S+$/, "Sin espacios."),
+    // URL base de la API para este entorno; vacía = la por defecto del servidor.
+    base_url: z.string().trim().refine((v) => v === "" || /^https:\/\/[^\s?#]+$/.test(v) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(v),
+      "Debe empezar con https:// y no tener parámetros (?…)."),
+    api_key: estado.configurada
+      ? z.string().trim().refine((v) => v === "" || (v.length >= 8 && /^\S+$/.test(v)), "Mínimo 8 caracteres, sin espacios.")
+      : z.string().trim().min(8, "El API Key debe tener al menos 8 caracteres.").regex(/^\S+$/, "Sin espacios."),
     api_secret: estado.configurada
       ? z.string().trim().refine((v) => v === "" || (v.length >= 8 && /^\S+$/.test(v)), "Mínimo 8 caracteres, sin espacios.")
       : z.string().trim().min(8, "Ingresa el API Secret (mínimo 8 caracteres).").regex(/^\S+$/, "Sin espacios."),
   })
   type Values = z.infer<typeof schema>
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { api_key: "", api_secret: "" } })
+  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { base_url: estado.base_url ?? "", api_key: "", api_secret: "" } })
   const { errors, isSubmitting } = form.formState
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      const res = await guardar.mutateAsync({ api_key: values.api_key, api_secret: values.api_secret || undefined })
-      form.reset({ api_key: "", api_secret: "" })
+      const res = await guardar.mutateAsync({ api_key: values.api_key || undefined, api_secret: values.api_secret || undefined, base_url: values.base_url || null })
+      form.reset({ base_url: res.data.base_url ?? "", api_key: "", api_secret: "" })
       setVerSecreto(false)
       if (res.data.verificacion_ok) toast.success("Credenciales guardadas y verificadas.")
       else toast.warning("Credenciales guardadas, pero la verificación falló.", { description: res.data.verificacion_mensaje ?? undefined })
@@ -271,6 +277,8 @@ function CredencialCard({ empresaId, estado, enUso }: { empresaId: number; estad
             <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
               <dt className="text-muted-foreground">API Key</dt>
               <dd className="tabular-nums">{estado.api_key_mascara}</dd>
+              <dt className="text-muted-foreground">URL de la API</dt>
+              <dd className="truncate"><code className="text-xs">{estado.base_url ?? urlDefecto}</code>{!estado.base_url && <span className="text-muted-foreground"> (por defecto)</span>}</dd>
               <dt className="text-muted-foreground">Verificado</dt>
               <dd>{fecha(estado.verificado_at)}</dd>
               {r && (
@@ -298,13 +306,28 @@ function CredencialCard({ empresaId, estado, enUso }: { empresaId: number; estad
 
         <form id={`form-${estado.entorno}`} onSubmit={onSubmit} noValidate autoComplete="off">
           <FieldGroup>
+            <Field data-invalid={!!errors.base_url}>
+              <FieldLabel htmlFor={`base_url_${estado.entorno}`}>URL base de la API</FieldLabel>
+              <Input
+                id={`base_url_${estado.entorno}`}
+                type="url"
+                inputMode="url"
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={urlDefecto}
+                aria-invalid={!!errors.base_url}
+                {...form.register("base_url")}
+              />
+              <FieldDescription>Déjala vacía para usar la por defecto ({urlDefecto}). Al cambiarla se vuelve a verificar la conexión.</FieldDescription>
+              <FieldError errors={[errors.base_url]} />
+            </Field>
             <Field data-invalid={!!errors.api_key}>
               <FieldLabel htmlFor={idKey}>{estado.configurada ? "Nuevo API Key" : "API Key"}</FieldLabel>
               <Input
                 id={idKey}
                 autoComplete="off"
                 spellCheck={false}
-                placeholder={estado.api_key_mascara ?? "Pega aquí el API Key"}
+                placeholder={estado.configurada ? `${estado.api_key_mascara} · vacío = conservar` : "Pega aquí el API Key"}
                 aria-invalid={!!errors.api_key}
                 {...form.register("api_key")}
               />

@@ -21,7 +21,7 @@ function useInvalidate(empresaId: number) {
 export function useGuardarCredenciales(empresaId: number, entorno: Entorno) {
   const invalidate = useInvalidate(empresaId)
   return useMutation({
-    mutationFn: async (body: { api_key: string; api_secret?: string }) =>
+    mutationFn: async (body: { api_key?: string; api_secret?: string; base_url: string | null }) =>
       (await api.put<{ data: CredencialApiEstado; message: string }>(`/empresas/${empresaId}/credenciales-api/${entorno}`, body)).data,
     onSuccess: invalidate,
   })
