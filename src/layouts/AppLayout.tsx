@@ -48,6 +48,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { to: "/comprobantes", label: "Comprobantes", icon: FileCheck2Icon, permiso: "comprobantes.ver" },
       { to: "/cotizaciones", label: "Cotizaciones", icon: FileTextIcon, permiso: "cotizaciones.ver" },
       { to: "/guias", label: "Guías de remisión", icon: TruckIcon, permiso: "guias.ver" },
+      { to: "/retenciones", label: "Retenciones y percepciones", icon: HandCoinsIcon, permiso: "retenciones.ver" },
       { to: "/resumen-diario", label: "Resumen diario", icon: CalendarClockIcon, permiso: "comprobantes.ver" },
       { to: "/bajas", label: "Bajas SUNAT", icon: BanIcon, permiso: "comprobantes.ver" },
       { to: "/caja", label: "Caja", icon: WalletIcon, permiso: "caja.ver" },

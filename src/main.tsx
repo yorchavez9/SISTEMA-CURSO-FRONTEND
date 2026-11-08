@@ -22,6 +22,7 @@ import { ComprobantesPage } from "@/features/comprobantes/ComprobantesPage"
 import { BajasPage } from "@/features/comprobantes/BajasPage"
 import { ResumenDiarioPage } from "@/features/comprobantes/ResumenDiarioPage"
 import { GuiasPage } from "@/features/guias/GuiasPage"
+import { RetencionesPage } from "@/features/retenciones/RetencionesPage"
 import { CotizacionesPage } from "@/features/cotizaciones/CotizacionesPage"
 import { NuevaCotizacionPage } from "@/features/cotizaciones/NuevaCotizacionPage"
 import { CotizacionImprimible } from "@/features/cotizaciones/CotizacionImprimible"
@@ -54,6 +55,7 @@ const router = createBrowserRouter([
       { path: "cotizaciones", element: <CotizacionesPage /> },
       { path: "cotizaciones/nueva", element: <NuevaCotizacionPage /> },
       { path: "guias", element: <GuiasPage /> },
+      { path: "retenciones", element: <RetencionesPage /> },
       { path: "guias/nueva", element: <NuevaGuiaPage /> },
       { path: "caja", element: <CajaPage /> },
       { path: "cuentas-por-cobrar", element: <CuentasPorCobrarPage /> },
