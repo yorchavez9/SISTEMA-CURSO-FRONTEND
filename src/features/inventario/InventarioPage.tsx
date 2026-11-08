@@ -12,7 +12,6 @@ import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Switch } from "@/components/ui/switch"
@@ -309,12 +308,12 @@ function KardexSheet({ productoId, almacenId, onClose }: { productoId: number | 
     queryFn: async () => (await api.get<{ data: Kardex }>(`/inventario/kardex/${productoId}`, { params: { almacen_id: almacenId } })).data.data,
   })
   return (
-    <Sheet open={productoId !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-3xl">
-        <SheetHeader>
-          <SheetTitle>Kardex · {k.data?.producto.descripcion ?? ""}</SheetTitle>
-          <SheetDescription>Movimientos valorizados con saldo y costo promedio.</SheetDescription>
-        </SheetHeader>
+    <Dialog open={productoId !== null} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-3xl">
+        <DialogHeader className="p-4 pr-12">
+          <DialogTitle>Kardex · {k.data?.producto.descripcion ?? ""}</DialogTitle>
+          <DialogDescription>Movimientos valorizados con saldo y costo promedio.</DialogDescription>
+        </DialogHeader>
         <div className="px-4 pb-6">
           {k.isLoading ? <Skeleton className="h-40" /> : k.data?.movimientos.length === 0 ? <p className="text-sm text-muted-foreground">Sin movimientos en este almacén.</p> : (
             <Table>
@@ -341,7 +340,7 @@ function KardexSheet({ productoId, almacenId, onClose }: { productoId: number | 
             </Table>
           )}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }

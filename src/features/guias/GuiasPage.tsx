@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Spinner } from "@/components/ui/spinner"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -174,12 +174,12 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
   })
   const g = q.data
   return (
-    <Sheet open={id !== null} onOpenChange={(o) => !o && onClose()}>
-      <SheetContent className="w-full overflow-y-auto sm:max-w-xl">
-        <SheetHeader>
-          <SheetTitle className="tabular-nums">{g?.numero ?? "Guía de remisión"}</SheetTitle>
-          <SheetDescription>{g ? `${g.motivo} · ${g.modalidad}` : "Cargando…"}</SheetDescription>
-        </SheetHeader>
+    <Dialog open={id !== null} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl">
+        <DialogHeader className="p-4 pr-12">
+          <DialogTitle className="tabular-nums">{g?.numero ?? "Guía de remisión"}</DialogTitle>
+          <DialogDescription>{g ? `${g.motivo} · ${g.modalidad}` : "Cargando…"}</DialogDescription>
+        </DialogHeader>
         {!g ? <div className="px-4"><Skeleton className="h-64" /></div> : (
           <div className="flex flex-col gap-5 px-4 pb-6 text-sm">
             <div className="flex flex-wrap items-center gap-2">
@@ -256,8 +256,8 @@ function DetalleGuia({ id, onClose, onReintentar, reintentando }: { id: number |
             </Seccion>
           </div>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
 

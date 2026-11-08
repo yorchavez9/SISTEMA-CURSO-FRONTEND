@@ -243,6 +243,17 @@ function CodigoSunatCombobox({ value, onChange }: { value: string; onChange: (v:
 
 function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto | null; onClose: () => void; onSaved: () => void }) {
   const cat = useCatalogos()
+  const { empresa, puede } = useAuth()
+  // Stock inicial: solo al crear y con permiso de inventario.
+  const conStockInicial = !producto && puede("inventario.movimientos")
+  const almacenes = useQuery({
+    queryKey: ["almacenes", empresa?.id],
+    enabled: conStockInicial,
+    queryFn: async () => (await api.get<{ data: { id: number; nombre: string; establecimiento: string | null }[] }>("/almacenes")).data.data,
+  })
+  const [stockInicial, setStockInicial] = useState("")
+  const [almacenElegido, setAlmacenElegido] = useState("")
+  const almacenId = almacenElegido || String(almacenes.data?.[0]?.id ?? "")
   const qc = useQueryClient()
   const categorias = useQuery({ queryKey: ["categorias"], queryFn: async () => (await api.get<{ data: Categoria[] }>("/categorias")).data.data })
   const [nuevaCat, setNuevaCat] = useState("")
@@ -328,6 +339,7 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
       aplica_icbper: v.aplica_icbper, factor_icbper: v.aplica_icbper ? Number(v.factor_icbper) : null,
       controla_stock: v.tipo === "bien" && v.controla_stock, stock_minimo: v.stock_minimo ? Number(v.stock_minimo) : 0,
       presentaciones: v.presentaciones.map((p) => ({ ...p, factor: Number(p.factor), precio_venta: Number(p.precio_venta) })),
+      ...(conStockInicial && v.tipo === "bien" && v.controla_stock && Number(stockInicial) > 0 ? { stock_inicial: Number(stockInicial), almacen_id: Number(almacenId) } : {}),
     }
     try {
       const r = producto ? await api.put<{ data: ProductoDto; message: string }>(`/productos/${producto.id}`, body) : await api.post<{ data: ProductoDto; message: string }>("/productos", body)
@@ -512,6 +524,21 @@ function ProductoDialog({ producto, onClose, onSaved }: { producto: ProductoDto 
                     <FieldLabel htmlFor="p-min">Stock mínimo</FieldLabel>
                     <Input id="p-min" inputMode="decimal" aria-invalid={!!errors.stock_minimo} {...form.register("stock_minimo")} />
                   </Field>
+                  {conStockInicial && form.watch("controla_stock") && (
+                    <>
+                      <Field>
+                        <FieldLabel htmlFor="p-inicial">Stock inicial</FieldLabel>
+                        <Input id="p-inicial" inputMode="decimal" className="tabular-nums" value={stockInicial} onChange={(e) => setStockInicial(e.target.value)} />
+                      </Field>
+                      <Field>
+                        <FieldLabel>Almacén</FieldLabel>
+                        <Select value={almacenId} onValueChange={setAlmacenElegido}>
+                          <SelectTrigger aria-label="Almacén"><SelectValue /></SelectTrigger>
+                          <SelectContent>{almacenes.data?.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.establecimiento ?? a.nombre}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </Field>
+                    </>
+                  )}
                 </div>
                 {pres.fields.map((f, i) => (
                   <div key={f.id} className="grid grid-cols-[1fr_6rem_6rem_7rem_auto] items-end gap-2">
