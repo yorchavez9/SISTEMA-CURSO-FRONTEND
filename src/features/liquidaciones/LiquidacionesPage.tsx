@@ -34,7 +34,7 @@ interface Liquidacion {
 }
 interface Detalle extends Liquidacion {
   vendedor_direccion: string; lugar_direccion: string; productos_agropecuarios: boolean; porcentaje_renta: number
-  items: { descripcion: string; cantidad: number; valor_unitario: number; unidad: string; tip_afe_igv: string }[]
+  items: { descripcion: string; cantidad: number; valor_unitario: number; unidad: string; tip_afe_igv: string; cod_producto_sunat?: string }[]
   observacion: string | null; sunat_notas: string[]; historial: { fecha: string; estado: string; detalle: string | null }[]; revertible: boolean
 }
 interface Opciones {
@@ -160,8 +160,8 @@ function ReporteCard() {
   )
 }
 
-interface ItemForm { key: string; descripcion: string; cantidad: string; valor_unitario: string; unidad: string; tip_afe_igv: string }
-const itemVacio = (): ItemForm => ({ key: uid(), descripcion: "", cantidad: "1", valor_unitario: "", unidad: "NIU", tip_afe_igv: "10" })
+interface ItemForm { key: string; descripcion: string; cod_producto_sunat: string; cantidad: string; valor_unitario: string; unidad: string; tip_afe_igv: string }
+const itemVacio = (): ItemForm => ({ key: uid(), descripcion: "", cod_producto_sunat: "", cantidad: "1", valor_unitario: "", unidad: "NIU", tip_afe_igv: "10" })
 
 function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id: number) => void }) {
   const cat = useCatalogos()
@@ -197,7 +197,7 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
   const emitir = useMutation({
     mutationFn: async () => (await api.post<{ data: Detalle; message: string }>("/liquidaciones", {
       idempotency_key: idem.current, serie_id: serie?.id, productos_agropecuarios: agro, vendedor: v, lugar: lug,
-      items: items.map(({ descripcion, cantidad, valor_unitario, unidad, tip_afe_igv }) => ({ descripcion, cantidad: Number(cantidad), valor_unitario: Number(valor_unitario), unidad, tip_afe_igv })),
+      items: items.map(({ descripcion, cod_producto_sunat, cantidad, valor_unitario, unidad, tip_afe_igv }) => ({ descripcion, cod_producto_sunat, cantidad: Number(cantidad), valor_unitario: Number(valor_unitario), unidad, tip_afe_igv })),
     })).data,
     onMutate: () => setErrores({}),
     onSuccess: (r) => { toast.success(r.message); onCreada(r.data.id) },
@@ -251,13 +251,13 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
             </div>) },
 { id: "bienes", label: "Bienes", contenido: (<div className="flex flex-col gap-5">
 <FieldSet>
-              <FieldLegend variant="label">Bienes comprados</FieldLegend>
               <Table>
-                <TableHeader><TableRow><TableHead>Descripción</TableHead><TableHead className="w-44">Unidad</TableHead><TableHead className="w-24 text-right">Cantidad</TableHead><TableHead className="w-28 text-right">Valor unit.</TableHead><TableHead className="w-32">IGV</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Descripción</TableHead><TableHead className="w-28">Cód. SUNAT</TableHead><TableHead className="w-36">Unidad</TableHead><TableHead className="w-24 text-right">Cantidad</TableHead><TableHead className="w-28 text-right">Valor unit.</TableHead><TableHead className="w-32">IGV</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
                 <TableBody>
                   {itemsPag.visibles.map((it, k) => { const i = itemsPag.offset + k; return (
                     <TableRow key={it.key}>
                       <TableCell><Input aria-label="Descripción" value={it.descripcion} aria-invalid={!!errores[`items.${i}.descripcion`]} onChange={(e) => setItem(i, "descripcion", e.target.value)} /></TableCell>
+                      <TableCell><Input aria-label="Código SUNAT (catálogo 25)" placeholder="8 dígitos" className="tabular-nums" inputMode="numeric" maxLength={8} value={it.cod_producto_sunat} aria-invalid={!!errores[`items.${i}.cod_producto_sunat`]} onChange={(e) => setItem(i, "cod_producto_sunat", e.target.value.trim())} /></TableCell>
                       <TableCell><Select value={it.unidad} onValueChange={(u) => setItem(i, "unidad", u)}><SelectTrigger aria-label="Unidad"><SelectValue /></SelectTrigger><SelectContent>{unidades.map((u) => <SelectItem key={u.codigo} value={u.codigo}>{u.codigo} · {u.descripcion}</SelectItem>)}</SelectContent></Select></TableCell>
                       <TableCell><Input aria-label="Cantidad" className="text-right tabular-nums" inputMode="decimal" value={it.cantidad} aria-invalid={!!errores[`items.${i}.cantidad`]} onChange={(e) => setItem(i, "cantidad", e.target.value)} /></TableCell>
                       <TableCell><Input aria-label="Valor unitario" className="text-right tabular-nums" inputMode="decimal" value={it.valor_unitario} aria-invalid={!!errores[`items.${i}.valor_unitario`]} onChange={(e) => setItem(i, "valor_unitario", e.target.value)} /></TableCell>
@@ -307,11 +307,15 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
   const bienesPag = usePaginaLocal(l?.items ?? [], 5, 2)
   const histPag = usePaginaLocal(l?.historial ?? [], 6, 5)
   const conApi = !!l?.tiene_archivos
+  const faltan = l?.estado === "error" ? l.items.map((it, i) => ({ ...it, i })).filter((x) => !x.cod_producto_sunat) : []
+  const faltanPag = usePaginaLocal(faltan, 2, 1)
+  const [codigos, setCodigos] = useState<Record<number, string>>({})
+  const codigosOk = faltan.every((x) => /^\d{8}$/.test(codigos[x.i] ?? ""))
   const pagos = useQuery({ queryKey: ["liquidacion-pagos", id], enabled: id !== null && conApi, queryFn: async () => (await api.get<{ data: Pagos }>(`/liquidaciones/${id}/pagos`)).data.data })
   const op = useQuery({ queryKey: ["liquidaciones-opciones"], enabled: rev, queryFn: async () => (await api.get<{ data: Opciones }>("/liquidaciones/opciones")).data.data })
   const puedeEmitir = puede("liquidaciones.emitir")
   const refrescar = (x?: Detalle) => { if (x) qc.setQueryData(["liquidacion", id], x); qc.invalidateQueries({ queryKey: ["liquidaciones"] }) }
-  const reintentar = useMutation({ mutationFn: async () => (await api.post<{ data: Detalle; message: string }>(`/liquidaciones/${id}/reintentar`)).data, onSuccess: (x) => { toast.success(x.message); refrescar(x.data) }, onError: (e) => toast.error(errorDe(e)) })
+  const reintentar = useMutation({ mutationFn: async () => (await api.post<{ data: Detalle; message: string }>(`/liquidaciones/${id}/reintentar`, faltan.length ? { codigos } : {})).data, onSuccess: (x) => { toast.success(x.message); refrescar(x.data) }, onError: (e) => toast.error(errorDe(e)) })
   const revertir = useMutation({ mutationFn: async () => (await api.post<{ data: Detalle; message: string }>(`/liquidaciones/${id}/revertir`, { causal, motivo })).data, onSuccess: (x) => { toast.success(x.message); refrescar(x.data); setRev(false); setMotivo("") }, onError: (e) => { toast.error(errorDe(e)); qc.invalidateQueries({ queryKey: ["liquidacion", id] }) } })
   const trasPago = (x: { data: Pagos; message: string }) => { toast.success(x.message); qc.setQueryData(["liquidacion-pagos", id], x.data); qc.invalidateQueries({ queryKey: ["liquidacion", id] }); refrescar() }
   const pagar = useMutation({ mutationFn: async () => (await api.post<{ data: Pagos; message: string }>(`/liquidaciones/${id}/pagos`, { metodo: pago.metodo, monto: Number(pago.monto), referencia: pago.referencia || null })).data, onSuccess: (x) => { trasPago(x); setPago({ metodo: "efectivo", monto: "", referencia: "" }) }, onError: (e) => toast.error(errorDe(e)) })
@@ -331,9 +335,21 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
             {l.sunat_notas.map((n, i) => <Alert key={i}><AlertDescription>{n}</AlertDescription></Alert>)}
             {l.ultimo_error && <Alert variant="destructive"><XCircleIcon /><AlertDescription>{l.ultimo_error}</AlertDescription></Alert>}
             {l.reversion && <Alert variant={["error", "rechazado"].includes(l.reversion.estado) ? "destructive" : "default"}><BanIcon /><AlertTitle>Reversión {l.reversion.identifier ?? ""}: {l.reversion.estado}</AlertTitle><AlertDescription>{l.reversion.error ?? l.reversion.motivo}</AlertDescription></Alert>}
+            {puedeEmitir && faltan.length > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm font-medium">Ingresa el código SUNAT (catálogo 25) de cada bien para reenviar</p>
+                {faltanPag.visibles.map((x) => (
+                  <div key={x.i} className="grid items-center gap-2 sm:grid-cols-[1fr_9rem]">
+                    <span className="truncate text-sm">{x.descripcion}</span>
+                    <Input aria-label={`Código SUNAT de ${x.descripcion}`} placeholder="8 dígitos" className="tabular-nums" inputMode="numeric" maxLength={8} value={codigos[x.i] ?? ""} onChange={(e) => setCodigos({ ...codigos, [x.i]: e.target.value.trim() })} />
+                  </div>
+                ))}
+                {faltanPag.pager}
+              </div>
+            )}
             <div className="flex flex-wrap gap-2">
               {puede("comprobantes.descargar") && formatos(l).map((t) => <Button key={t} variant="outline" size="sm" onClick={() => descargar(l, t)}><Icono t={t} /> {t.toUpperCase()}</Button>)}
-              {puedeEmitir && (l.estado === "error" || l.estado === "enviado" || l.reversion?.estado === "enviado") && <Button size="sm" variant="warning" disabled={reintentar.isPending} onClick={() => reintentar.mutate()}><RotateCwIcon /> {l.estado === "error" ? "Reenviar" : "Consultar estado"}</Button>}
+              {puedeEmitir && (l.estado === "error" || l.estado === "enviado" || l.reversion?.estado === "enviado") && <Button size="sm" variant="warning" disabled={reintentar.isPending || !codigosOk} onClick={() => reintentar.mutate()}><RotateCwIcon /> {l.estado === "error" ? "Reenviar" : "Consultar estado"}</Button>}
               {puedeEmitir && l.revertible && <Button size="sm" variant="destructive" onClick={() => setRev(true)}><BanIcon /> Revertir</Button>}
             </div>
             <section><h3 className="mb-1 font-medium">Vendedor</h3><p>{l.vendedor.nombre}</p><p className="tabular-nums text-xs text-muted-foreground">{l.vendedor.num_doc} · {l.vendedor_direccion}</p></section>
