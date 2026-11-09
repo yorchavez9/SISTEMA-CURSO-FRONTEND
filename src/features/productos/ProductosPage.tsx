@@ -200,7 +200,7 @@ export function ProductosPage() {
   )
 }
 
-function CodigoSunatCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function CodigoSunatCombobox({ value, onChange, placeholder = "Buscar en el catálogo SUNAT…" }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
   const [open, setOpen] = useState(false)
   const [q, setQ] = useState("")
   const qd = useDebounced(q, 400)
@@ -213,8 +213,8 @@ function CodigoSunatCombobox({ value, onChange }: { value: string; onChange: (v:
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full justify-between font-normal">
-          <span className={cn("truncate", !value && "text-muted-foreground")}>{value || "Buscar en el catálogo SUNAT…"}</span>
+        <Button variant="outline" role="combobox" aria-expanded={open} className="w-full min-w-0 justify-between font-normal">
+          <span className={cn("truncate", !value && "text-muted-foreground")}>{value || placeholder}</span>
           {value ? (
             <XIcon className="opacity-60" onClick={(e) => { e.stopPropagation(); onChange("") }} aria-label="Quitar código" />
           ) : <ChevronsUpDownIcon className="opacity-50" />}
@@ -225,7 +225,7 @@ function CodigoSunatCombobox({ value, onChange }: { value: string; onChange: (v:
           <CommandInput placeholder="Ej. laptop, mantenimiento, 4321…" value={q} onValueChange={setQ} />
           <CommandList>
             {res.isFetching && <div className="flex justify-center p-3"><Spinner /></div>}
-            <CommandEmpty>{qd.length < 3 ? "Escribe al menos 3 caracteres." : res.isError ? toApiError(res.error).message : "Sin resultados."}</CommandEmpty>
+            <CommandEmpty>{qd.length < 3 ? "Escribe al menos 3 caracteres." : res.isError ? toApiError(res.error).message : "Sin resultados. Prueba una palabra más general (ej. bebida en vez de gaseosa)."}</CommandEmpty>
             <CommandGroup>
               {res.data?.map((c) => (
                 <CommandItem key={c.codigo} value={c.codigo} onSelect={() => { onChange(c.codigo); setOpen(false) }}>

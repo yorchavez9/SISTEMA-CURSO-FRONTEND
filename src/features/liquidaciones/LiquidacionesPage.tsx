@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react"
+import { CodigoSunatCombobox } from "@/features/productos/ProductosPage"
 import { SeccionesModal, usePaginaLocal } from "@/components/shared/SeccionesModal"
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
@@ -252,12 +253,12 @@ function NuevaDialog({ onClose, onCreada }: { onClose: () => void; onCreada: (id
 { id: "bienes", label: "Bienes", contenido: (<div className="flex flex-col gap-5">
 <FieldSet>
               <Table>
-                <TableHeader><TableRow><TableHead>Descripción</TableHead><TableHead className="w-28">Cód. SUNAT</TableHead><TableHead className="w-36">Unidad</TableHead><TableHead className="w-24 text-right">Cantidad</TableHead><TableHead className="w-28 text-right">Valor unit.</TableHead><TableHead className="w-32">IGV</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
+                <TableHeader><TableRow><TableHead>Descripción</TableHead><TableHead className="w-44">Cód. SUNAT</TableHead><TableHead className="w-36">Unidad</TableHead><TableHead className="w-24 text-right">Cantidad</TableHead><TableHead className="w-28 text-right">Valor unit.</TableHead><TableHead className="w-32">IGV</TableHead><TableHead className="w-10" /></TableRow></TableHeader>
                 <TableBody>
                   {itemsPag.visibles.map((it, k) => { const i = itemsPag.offset + k; return (
                     <TableRow key={it.key}>
                       <TableCell><Input aria-label="Descripción" value={it.descripcion} aria-invalid={!!errores[`items.${i}.descripcion`]} onChange={(e) => setItem(i, "descripcion", e.target.value)} /></TableCell>
-                      <TableCell><Input aria-label="Código SUNAT (catálogo 25)" placeholder="8 dígitos" className="tabular-nums" inputMode="numeric" maxLength={8} value={it.cod_producto_sunat} aria-invalid={!!errores[`items.${i}.cod_producto_sunat`]} onChange={(e) => setItem(i, "cod_producto_sunat", e.target.value.trim())} /></TableCell>
+                      <TableCell><CodigoSunatCombobox placeholder="Buscar…" value={it.cod_producto_sunat} onChange={(v) => setItem(i, "cod_producto_sunat", v)} /></TableCell>
                       <TableCell><Select value={it.unidad} onValueChange={(u) => setItem(i, "unidad", u)}><SelectTrigger aria-label="Unidad"><SelectValue /></SelectTrigger><SelectContent>{unidades.map((u) => <SelectItem key={u.codigo} value={u.codigo}>{u.codigo} · {u.descripcion}</SelectItem>)}</SelectContent></Select></TableCell>
                       <TableCell><Input aria-label="Cantidad" className="text-right tabular-nums" inputMode="decimal" value={it.cantidad} aria-invalid={!!errores[`items.${i}.cantidad`]} onChange={(e) => setItem(i, "cantidad", e.target.value)} /></TableCell>
                       <TableCell><Input aria-label="Valor unitario" className="text-right tabular-nums" inputMode="decimal" value={it.valor_unitario} aria-invalid={!!errores[`items.${i}.valor_unitario`]} onChange={(e) => setItem(i, "valor_unitario", e.target.value)} /></TableCell>
@@ -337,11 +338,11 @@ function DetalleDialog({ id, onClose }: { id: number | null; onClose: () => void
             {l.reversion && <Alert variant={["error", "rechazado"].includes(l.reversion.estado) ? "destructive" : "default"}><BanIcon /><AlertTitle>Reversión {l.reversion.identifier ?? ""}: {l.reversion.estado}</AlertTitle><AlertDescription>{l.reversion.error ?? l.reversion.motivo}</AlertDescription></Alert>}
             {puedeEmitir && faltan.length > 0 && (
               <div className="flex flex-col gap-2">
-                <p className="text-sm font-medium">Ingresa el código SUNAT (catálogo 25) de cada bien para reenviar</p>
+                <p className="text-sm font-medium">Busca el código SUNAT de cada bien para reenviar</p>
                 {faltanPag.visibles.map((x) => (
-                  <div key={x.i} className="grid items-center gap-2 sm:grid-cols-[1fr_9rem]">
+                  <div key={x.i} className="grid items-center gap-2 sm:grid-cols-[1fr_12rem]">
                     <span className="truncate text-sm">{x.descripcion}</span>
-                    <Input aria-label={`Código SUNAT de ${x.descripcion}`} placeholder="8 dígitos" className="tabular-nums" inputMode="numeric" maxLength={8} value={codigos[x.i] ?? ""} onChange={(e) => setCodigos({ ...codigos, [x.i]: e.target.value.trim() })} />
+                    <CodigoSunatCombobox placeholder="Buscar código…" value={codigos[x.i] ?? ""} onChange={(v) => setCodigos({ ...codigos, [x.i]: v })} />
                   </div>
                 ))}
                 {faltanPag.pager}
